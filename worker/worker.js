@@ -22,7 +22,6 @@
 
 const SS = "https://api.smartsheet.com/2.0";
 const REALM = "IFM AI Use Case Dashboard";
-const CACHE_TTL = 300; // seconds — live data is re-fetched at most every 5 min
 
 export default {
   async fetch(request, env, ctx) {
@@ -74,11 +73,9 @@ function timingSafeEqual(a, b) {
 
 /* --------------------------- GET /api/data ------------------------------- */
 async function handleData(request, url, env, ctx) {
-  const cache = caches.default;
-  const cacheKey = new Request(url.toString(), { method: "GET" });
-  const hit = await cache.match(cacheKey);
-  if (hit) return hit;
-
+  // Always fresh — this is a gated, low-traffic tool, so we read Smartsheet live
+  // on every request. (No edge cache: a cached copy made deleted/added rows
+  // linger for up to the TTL.)
   if (!env.SMARTSHEET_TOKEN) return json({ error: "Worker missing SMARTSHEET_TOKEN secret" }, 500);
 
   const which = url.searchParams.get("sheet") || "master";
@@ -111,8 +108,7 @@ async function handleData(request, url, env, ctx) {
   });
 
   const resp = json({ ok: true, sheetId, rows }, 200);
-  resp.headers.set("Cache-Control", `public, max-age=${CACHE_TTL}`);
-  ctx.waitUntil(cache.put(cacheKey, resp.clone()));
+  resp.headers.set("Cache-Control", "no-store");
   return resp;
 }
 
