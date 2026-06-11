@@ -1,49 +1,40 @@
 # IFM AI Use Case Dashboard
 
-A single-file, interactive dashboard of IFM AI use cases (sourced from the Master AI Use Case Tracker). Browse, filter, and sort use cases; submit new ideas, which are saved **silently to Smartsheet** in the background (no navigation away from the dashboard).
+A single-file, interactive dashboard of IFM AI use cases. It reads **live from Smartsheet** and is served behind a **shared-password gate** by one Cloudflare Worker. Browse, filter, and sort use cases; view an **Ideas** tab of submitted ideas; and submit new ideas, which are saved to Smartsheet in the background (no navigation away).
 
-**Repo:** `cbre-vantage-studio/AIenabledFM` (public)
-**Live page:** https://cbre-vantage-studio.github.io/AIenabledFM/
-**Submissions land in Smartsheet:** *AI Use Case Ideas (Submissions)* — sheet id `5743927238807428` (workspace *AI Enabled FM*).
+**Repo:** `cbre-vantage-studio/AIenabledFM`
+**Served by:** the Cloudflare Worker (see [`worker/README.md`](worker/README.md)) — its URL is the dashboard.
 
-> ⚠️ **This repo and its Pages site are PUBLIC.** `index.html` contains client/bid data (Bank of America & Amazon assumptions, savings figures), publicly viewable by anyone with the URL.
-
----
-
-## How submitted ideas are saved (background → Smartsheet)
-
-A public static page can't safely hold a write token, so submission goes through a tiny **Cloudflare Worker** that holds the Smartsheet token server-side:
+## How it works
 
 ```
-Dashboard  --POST idea JSON-->  Cloudflare Worker  --Smartsheet API-->  Submissions sheet
+Browser ──Basic Auth──> Cloudflare Worker ──┬─ GET /                → dashboard page (public/index.html)
+                                            ├─ GET /api/data        → live Smartsheet rows (Master / Submissions)
+                                            └─ POST /api/idea        → adds a row to the Submissions sheet
 ```
 
-Clicking **+ Add Idea → Submit**:
-1. Adds the idea to the on-screen list and caches it in the browser.
-2. `fetch()`es the Worker, which adds a row to the Smartsheet — the user **stays on the dashboard** and sees a success toast. No new tab, no manual save.
+- **Main data is live.** On each load the page fetches `/api/data?sheet=master` and renders the KPIs, "Ready for Deployment" grid, and table from the **AI Use Case Master Tracker** (sheet `8091505762717572`). There is no embedded data — edit the Smartsheet, reload, and the dashboard reflects it.
+- **Ideas tab.** Reads `/api/data?sheet=submissions` (the **AI Use Case Ideas (Submissions)** sheet, `5743927238807428`) and lists submitted ideas; clicking one opens the in-dashboard detail view.
+- **Add Idea.** Submitting POSTs to `/api/idea`; the Worker holds the Smartsheet token server-side and appends a row. The submitter stays on the dashboard and sees a success toast; the Ideas tab refreshes.
+- **Gate.** The Worker requires a shared password (HTTP Basic Auth) on every request — page, data, and submit. Because everything is same-origin, the browser supplies the credentials to the API calls automatically (no CORS).
 
-**Setup (one-time, required before submission works):** see [`worker/README.md`](worker/README.md). In short: deploy the Worker, store the Smartsheet token as a secret, then paste the Worker URL into the `const IDEA_API = { url: ... }` block near the top of the `<script>` in `index.html` and push.
+## Setup & deploy
 
-> ⏳ **Until the Worker is deployed and `IDEA_API.url` is set,** submitting shows "submission endpoint not configured yet" (the idea is still cached locally). The legacy GitHub-Issues path is disabled (`const GITHUB.enabled = false`) but kept in the code for reference. A dormant SharePoint backend also remains (`SHAREPOINT.enabled = false`).
+See [`worker/README.md`](worker/README.md): set the `SMARTSHEET_TOKEN` and `DASH_PASSWORD` secrets, then `wrangler deploy`. The printed Worker URL is the dashboard.
 
-## GitHub Pages
+> **Disable GitHub Pages** (Settings → Pages). The dashboard is served only by the gated Worker now; the public Pages site is retired. The embedded `DATA` has been removed from `index.html`, so the repo source no longer contains client/bid data.
 
-Enabled from `main` / root; live at https://cbre-vantage-studio.github.io/AIenabledFM/ (redeploys on each push). `.nojekyll` serves files as-is.
+## Updating the dashboard data
 
-## Updating the dashboard data later
+Edit the **Master Tracker** Smartsheet directly — the dashboard picks up changes on the next load (data is cached ~5 min at the Worker). To change the page itself, edit `public/index.html` and `wrangler deploy`.
 
-The use-case data is embedded in `index.html` (the `const DATA = [...]` array). Regenerate, commit, push — Pages redeploys automatically.
-
----
-
-### Files
+## Files
 
 | File | Purpose |
 |------|---------|
-| `index.html` | The dashboard (Pages serves it as the site root). |
-| `worker/worker.js` | Cloudflare Worker: receives an idea, writes a Smartsheet row. |
-| `worker/wrangler.toml` | Worker config (sheet id, allowed origin). |
-| `worker/README.md` | Worker deploy + token setup steps. |
-| `.nojekyll` | Serve files as-is (no Jekyll). |
-| `.gitignore` | Ignores OS cruft. |
-| `.github/ISSUE_TEMPLATE/ai-use-case-idea.yml` | (Legacy) issue form, from the GitHub-Issues approach. |
+| `public/index.html` | The dashboard (served by the Worker as a static asset). |
+| `worker/worker.js` | Cloudflare Worker: auth gate, live reads, idea write, asset serving. |
+| `worker/wrangler.toml` | Worker config — `[assets]` → `../public`, sheet ids. |
+| `worker/README.md` | Worker deploy + secrets. |
+| `.github/ISSUE_TEMPLATE/ai-use-case-idea.yml` | (Legacy) issue form from the old GitHub-Issues approach. |
+| `.nojekyll` | Legacy Pages artifact (no longer used). |

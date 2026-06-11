@@ -1,9 +1,18 @@
-name = "aienabledfm-idea-proxy"
+name = "aienabledfm"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# Non-secret config. SMARTSHEET_TOKEN is a SECRET — set it with:
+# The Worker serves the dashboard as a static asset AND gates every request.
+# run_worker_first = true makes the Worker run before static-asset serving, so
+# the Basic Auth check covers index.html too (not just /api/*).
+[assets]
+directory = "../public"
+binding = "ASSETS"
+run_worker_first = true
+
+# Non-secret config. SMARTSHEET_TOKEN and DASH_PASSWORD are SECRETS — set with:
 #   wrangler secret put SMARTSHEET_TOKEN
+#   wrangler secret put DASH_PASSWORD
 [vars]
-SHEET_ID = "5743927238807428"                              # AI Use Case Ideas (Submissions)
-ALLOWED_ORIGIN = "https://cbre-vantage-studio.github.io"   # the dashboard's origin ("*" to allow any)
+MASTER_SHEET_ID = "8091505762717572"        # AI Use Case Master Tracker
+SUBMISSIONS_SHEET_ID = "5743927238807428"   # AI Use Case Ideas (Submissions)
