@@ -8,7 +8,7 @@ A single-file, interactive dashboard of IFM AI use cases. It reads **live from S
 ## How it works
 
 ```
-Browser ──Basic Auth──> Cloudflare Worker ──┬─ GET /                → dashboard page (public/index.html)
+Browser ──Basic Auth──> Cloudflare Worker ──┬─ GET /                → dashboard page (index.html)
                                             ├─ GET /api/data        → live Smartsheet rows (Master / Submissions)
                                             └─ POST /api/idea        → adds a row to the Submissions sheet
 ```
@@ -22,7 +22,9 @@ Browser ──Basic Auth──> Cloudflare Worker ──┬─ GET /            
 
 See [`worker/README.md`](worker/README.md): set the `SMARTSHEET_TOKEN` and `DASH_PASSWORD` secrets, then `wrangler deploy`. The printed Worker URL is the dashboard.
 
-> **Disable GitHub Pages** (Settings → Pages). The dashboard is served only by the gated Worker now; the public Pages site is retired. The embedded `DATA` has been removed from `index.html`, so the repo source no longer contains client/bid data.
+`index.html` stays at the repo root, so the GitHub Pages build keeps working and no Pages change is required. The dashboard is served from the root by the Worker as a static asset (`.assetsignore` keeps the worker source/docs out of the upload). The embedded `DATA` has been removed from `index.html`, so the source no longer contains client/bid data.
+
+> Note: the GitHub Pages copy (if Pages stays enabled) is **ungated and non-functional** — it has no `/api` on the `github.io` origin, so it shows the load-error state. The working, password-gated dashboard is the **Worker URL**. Disabling Pages is optional but recommended so there's no confusing public shell.
 
 ## Updating the dashboard data
 
@@ -32,9 +34,10 @@ Edit the **Master Tracker** Smartsheet directly — the dashboard picks up chang
 
 | File | Purpose |
 |------|---------|
-| `public/index.html` | The dashboard (served by the Worker as a static asset). |
+| `index.html` | The dashboard (repo root; served by the Worker as a static asset). |
 | `worker/worker.js` | Cloudflare Worker: auth gate, live reads, idea write, asset serving. |
-| `worker/wrangler.toml` | Worker config — `[assets]` → `../public`, sheet ids. |
+| `worker/wrangler.toml` | Worker config — `[assets]` → repo root, sheet ids. |
+| `.assetsignore` | Keeps the worker source/docs out of the served asset set. |
 | `worker/README.md` | Worker deploy + secrets. |
 | `.github/ISSUE_TEMPLATE/ai-use-case-idea.yml` | (Legacy) issue form from the old GitHub-Issues approach. |
 | `.nojekyll` | Legacy Pages artifact (no longer used). |
