@@ -10,7 +10,7 @@ Browser ──Basic Auth──> Worker ──┬─ GET /                       
 ```
 
 - **Master Tracker:** `8091505762717572` · **Submissions:** `5743927238807428` (workspace *AI Enabled FM*)
-- **Files:** `worker.js` (code), `wrangler.toml` (config + `[assets]` binding → `../public`)
+- **Files:** `worker.js` (code), `wrangler.toml` (config + `[assets]` binding → repo root; `.assetsignore` filters the upload to just the dashboard)
 - Same-origin, so there is no CORS and the browser auto-sends the Basic Auth credentials to the `/api/*` calls.
 
 ## One-time setup (~10 min)
@@ -36,7 +36,7 @@ wrangler deploy
 ```
 Prints the Worker URL, e.g. `https://aienabledfm.<your-subdomain>.workers.dev`. That URL **is** the dashboard — open it and the browser prompts for the password (username can be anything).
 
-> `wrangler deploy` uploads `../public/index.html` as the static asset and `MASTER_SHEET_ID` / `SUBMISSIONS_SHEET_ID` from `wrangler.toml`. `run_worker_first = true` ensures the auth check runs before the page is served.
+> `wrangler deploy` uploads the repo-root `index.html` as the static asset (everything in `.assetsignore` — `worker/`, `*.md`, etc. — is excluded) and `MASTER_SHEET_ID` / `SUBMISSIONS_SHEET_ID` from `wrangler.toml`. `run_worker_first = true` ensures the auth check runs before the page is served.
 
 ## Test it
 ```bash
@@ -51,7 +51,7 @@ curl -u cbre:<password> -X POST https://aienabledfm.<sub>.workers.dev/api/idea \
 
 ## Notes / hardening
 - **Auth** is a single shared secret over HTTPS — keeps anonymous visitors out; it is not per-person identity. Rotate by re-running `wrangler secret put DASH_PASSWORD` and `wrangler deploy`.
-- **GitHub Pages must be disabled** for this repo (Settings → Pages) — the dashboard is now served only by this gated Worker. The embedded data has been removed from `index.html`, so the repo source no longer contains bid data.
+- **GitHub Pages** can stay enabled — `index.html` is still at the repo root, so the Pages build won't break. But the Pages copy is **ungated and non-functional** (no `/api` on `github.io`), so it just shows the load-error state. The real dashboard is the **Worker URL**; disabling Pages is optional/recommended to avoid a confusing public shell. The embedded data has been removed from `index.html`, so the source no longer contains bid data.
 - `/api/data` responses are cached ~5 min (`caches.default`); the cache is only read *after* the auth check passes.
 - Column titles are resolved at runtime, so renaming/reordering sheet columns is fine as long as the titles still match.
 - For per-person `@cbre.com` identity later, put the Worker behind a Cloudflare-proxied domain + Cloudflare Access (requires a custom domain).

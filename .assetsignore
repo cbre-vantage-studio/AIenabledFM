@@ -1,0 +1,8 @@
+worker
+.github
+.git
+.gitignore
+.assetsignore
+.dev.vars
+.DS_Store
+*.md

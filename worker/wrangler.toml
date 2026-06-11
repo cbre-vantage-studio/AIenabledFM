@@ -5,8 +5,10 @@ compatibility_date = "2024-11-01"
 # The Worker serves the dashboard as a static asset AND gates every request.
 # run_worker_first = true makes the Worker run before static-asset serving, so
 # the Basic Auth check covers index.html too (not just /api/*).
+# The dashboard lives at the repo root (index.html) so GitHub Pages stays valid;
+# .assetsignore (in the repo root) keeps the worker source/docs out of the upload.
 [assets]
-directory = "../public"
+directory = ".."
 binding = "ASSETS"
 run_worker_first = true
 
