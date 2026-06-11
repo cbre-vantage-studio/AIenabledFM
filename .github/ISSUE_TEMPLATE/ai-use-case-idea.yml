@@ -1,0 +1,41 @@
+name: AI Use Case Idea
+description: Submit a new AI use case idea for the IFM tracker
+title: "[Idea] "
+labels: ["idea"]
+body:
+  - type: input
+    id: use_case
+    attributes:
+      label: Use Case
+      placeholder: Short name for the AI use case
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: What does it do and what problem does it solve?
+    validations:
+      required: true
+  - type: input
+    id: service_line
+    attributes:
+      label: Service Line
+      placeholder: FM, Procurement, Experience, PJM, etc.
+  - type: input
+    id: impacted_role
+    attributes:
+      label: Impacted Role
+  - type: dropdown
+    id: priority
+    attributes:
+      label: SA Priority
+      options: ["3 — High", "2 — Med", "1 — Low", "0 — Live / TBD"]
+  - type: input
+    id: hours
+    attributes:
+      label: Est. Hours Saved / FTE / yr
+  - type: input
+    id: submitted_by
+    attributes:
+      label: Submitted By
