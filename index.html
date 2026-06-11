@@ -1647,11 +1647,11 @@ document.getElementById('ideaForm').addEventListener('submit', async e => {
     user_idea: true,
   };
 
-  // Add to the live list + cache immediately
-  DATA.push(rec);
+  // Cache locally as an offline fallback for the New Ideas tab only. Do NOT
+  // inject into the main tracker list — ideas live in the New Ideas tab,
+  // sourced live from the Submissions sheet (so a later deletion there is
+  // reflected on reload instead of lingering).
   const ideas = getStoredIdeas(); ideas.push(rec); saveStoredIdeas(ideas);
-  buildSummary();
-  render();
 
   // Persist the idea to Smartsheet via the Worker proxy (background — no navigation).
   const btn = document.getElementById('ideaSubmitBtn');
@@ -1679,13 +1679,16 @@ document.getElementById('ideaForm').addEventListener('submit', async e => {
 
   if (saved) {
     ideaMsg.className = 'ok';
-    ideaMsg.textContent = 'Idea submitted to Smartsheet and added to the list. Thank you!';
+    ideaMsg.textContent = 'Idea submitted to Smartsheet. Thank you! See the New Ideas tab.';
     f.reset();
     setTimeout(closeIdeaModal, 1600);
-    loadIdeas(); // refresh the Ideas tab so the new submission shows there too
+    // Switch to the New Ideas tab and refresh it live from the Submissions sheet.
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === 'ideas'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-ideas'));
+    loadIdeas();
   } else {
     ideaMsg.className = 'err';
-    ideaMsg.textContent = 'Added to the list and cached locally, but the Smartsheet submission did not go through (' + errMsg + '). Please try again.';
+    ideaMsg.textContent = 'Cached locally, but the Smartsheet submission did not go through (' + errMsg + '). Please try again.';
   }
 });
 
@@ -1716,16 +1719,13 @@ async function boot() {
   if (Array.isArray(rows) && rows.length) {
     DATA.length = 0;
     rows.forEach(x => { const rec = normalizeRow(x.cellsByTitle); rec.row = x.row; rec.permalink = x.permalink; DATA.push(rec); });
-    mergeStoredIdeas();
     rebuildFilterOptions();
     applySavedPrefs();
     buildSummary();
     render();
   } else {
-    // No live data — fall back to any locally cached ideas, else show an error.
-    mergeStoredIdeas();
-    if (DATA.length) { rebuildFilterOptions(); applySavedPrefs(); buildSummary(); render(); }
-    else showLoadError();
+    // No live master data and no embedded fallback — show an error.
+    showLoadError();
   }
 }
 
