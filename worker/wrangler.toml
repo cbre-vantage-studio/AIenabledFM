@@ -1,0 +1,9 @@
+name = "aienabledfm-idea-proxy"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Non-secret config. SMARTSHEET_TOKEN is a SECRET — set it with:
+#   wrangler secret put SMARTSHEET_TOKEN
+[vars]
+SHEET_ID = "5743927238807428"                              # AI Use Case Ideas (Submissions)
+ALLOWED_ORIGIN = "https://cbre-vantage-studio.github.io"   # the dashboard's origin ("*" to allow any)

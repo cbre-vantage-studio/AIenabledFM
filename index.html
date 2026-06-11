@@ -1410,11 +1410,27 @@ const SHAREPOINT = {
    To re-point this at a different repo, edit `owner` / `repo` below.
    (SharePoint above is dormant — it is only used if GITHUB.enabled = false.)
    ============================================================================ */
+// (Legacy) GitHub Issues path — superseded by IDEA_API below. Kept for reference only.
 const GITHUB = {
-  enabled: true,
+  enabled: false,
   owner:  "cbre-vantage-studio",          // GitHub user/org that owns the repo
   repo:   "AIenabledFM",                  // repo name
   label:  "idea",
+};
+
+/* ============================================================================
+   ADD IDEA → SMARTSHEET  (background submit via a Cloudflare Worker proxy)
+   ----------------------------------------------------------------------------
+   On submit, the dashboard POSTs the idea to the Worker URL below. The Worker
+   holds the Smartsheet API token SERVER-SIDE (never in this public page) and
+   adds a row to the "AI Use Case Ideas (Submissions)" sheet. The submitter
+   never leaves the dashboard; a toast confirms success.
+   See the worker/ folder for the Worker code and one-time setup.
+   >>> After deploying the Worker, paste its URL here: <<<
+   ============================================================================ */
+const IDEA_API = {
+  enabled: true,
+  url: "https://aienabledfm-idea-proxy.smartff.workers.dev",  // deployed Worker
 };
 function openGitHubIssue(rec) {
   if (!GITHUB.enabled || GITHUB.owner === "YOUR-GITHUB-USERNAME") return false;
@@ -1548,31 +1564,39 @@ document.getElementById('ideaForm').addEventListener('submit', async e => {
   buildSummary();
   render();
 
-  // Persist the idea. Primary path: open a pre-filled GitHub Issue.
-  // (Falls back to SharePoint only if GITHUB.enabled = false.)
+  // Persist the idea to Smartsheet via the Worker proxy (background — no navigation).
   const btn = document.getElementById('ideaSubmitBtn');
   btn.disabled = true; btn.textContent = 'Submitting…';
-  let opened = false;
-  let sp = { ok: false, skipped: true };
-  if (GITHUB.enabled) {
-    opened = openGitHubIssue(rec);
+  let saved = false, errMsg = '';
+  if (IDEA_API.enabled && IDEA_API.url && !/REPLACE-WITH-YOUR-WORKER/.test(IDEA_API.url)) {
+    try {
+      const resp = await fetch(IDEA_API.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rec),
+      });
+      saved = resp.ok;
+      if (!resp.ok) {
+        const e = await resp.json().catch(() => ({}));
+        errMsg = e.error || ('HTTP ' + resp.status);
+      }
+    } catch (err) {
+      errMsg = String(err);
+    }
   } else {
-    try { sp = await postToSharePoint(rec); } catch (err) { sp = { ok: false, error: String(err) }; }
+    errMsg = 'submission endpoint not configured yet';
   }
   btn.disabled = false; btn.textContent = 'Submit Idea';
 
-  ideaMsg.className = 'ok';
-  if (opened) {
-    ideaMsg.textContent = 'Idea added to the list. A GitHub Issue opened in a new tab — click "Submit new issue" there to save it to the repo. (If nothing opened, allow pop-ups for this page.)';
-  } else if (!SHAREPOINT.enabled) {
-    ideaMsg.textContent = 'Idea added to the list.';
-  } else if (sp.ok) {
-    ideaMsg.textContent = 'Idea submitted to SharePoint and added to the list.';
+  if (saved) {
+    ideaMsg.className = 'ok';
+    ideaMsg.textContent = 'Idea submitted to Smartsheet and added to the list. Thank you!';
+    f.reset();
+    setTimeout(closeIdeaModal, 1600);
   } else {
-    ideaMsg.textContent = 'Idea added to the list and cached locally — SharePoint sync was not confirmed.';
+    ideaMsg.className = 'err';
+    ideaMsg.textContent = 'Added to the list and cached locally, but the Smartsheet submission did not go through (' + errMsg + '). Please try again.';
   }
-  f.reset();
-  setTimeout(closeIdeaModal, opened ? 2600 : 1500);
 });
 
 render();
