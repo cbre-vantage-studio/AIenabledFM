@@ -1075,7 +1075,7 @@ const IDEAS_BY_ROW = {};
 // Map a raw Smartsheet {columnTitle: value} object into the dashboard's record
 // shape. RAW columns are copied; DERIVED fields are computed here (the only
 // place this logic lives now that DATA is loaded live).
-const STATUS_NORM = { 'Roadmap': 'In D&T Roadmap', 'Testing': 'In Testing', 'Testinging': 'In Testing' };
+const STATUS_NORM = { 'Roadmap': 'In D&T Roadmap', 'Testing': 'In Testing', 'Testinging': 'In Testing', 'Needs Assessment by D&T': 'Needs Review By D&T' };
 const PRI_LABEL = { 1: '1 — Low', 2: '2 — Med', 3: '3 — High' };
 function normalizeRow(c) {
   const g = (k) => { const v = c[k]; return (v === undefined || v === '') ? null : v; };
