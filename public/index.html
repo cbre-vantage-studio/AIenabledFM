@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IFM AI Use Case Dashboard — June 2026</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+  background: #FAFAFA;
+  color: #1A1A1A;
+  line-height: 1.4;
+  padding: 24px;
+  font-size: 14px;
+}
+.dash-header {
+  background: linear-gradient(135deg, #003F2D 0%, #00614A 100%);
+  color: #fff;
+  padding: 26px 32px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0,63,45,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.dash-header h1 {
+  font-family: 'Georgia', serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+.dash-header .add-idea-btn {
+  background: #17E88F;
+  color: #003F2D;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 26px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(23,232,143,0.35);
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+.dash-header .add-idea-btn:hover {
+  background: #2BF59C;
+  color: #003F2D;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(23,232,143,0.5);
+}
+.accent { color: #17E88F; }
+
+/* KPI tiles */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (max-width: 1400px) { .kpi-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 900px)  { .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi {
+  background: #fff;
+  padding: 18px 16px;
+  border-radius: 10px;
+  border-left: 4px solid #17E88F;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.kpi .label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #595959;
+  font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+.kpi .value {
+  font-family: 'Georgia', serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #003F2D;
+  line-height: 1;
+}
+.kpi.total    { border-left-color: #003F2D; }
+.kpi.ready    { border-left-color: #17E88F; }
+.kpi.testing  { border-left-color: #FF8C00; }
+.kpi.roadmap  { border-left-color: #B8E5C8; }
+.kpi.needs    { border-left-color: #D0D5D2; }
+.kpi.enabled  { border-left-color: #5E9EA0; }
+.kpi.hours    { border-left-color: #80BBAD; }
+
+/* Section title */
+.section-title {
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #003F2D;
+  margin: 28px 0 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::before {
+  content: '';
+  width: 28px;
+  height: 3px;
+  background: #17E88F;
+  border-radius: 2px;
+}
+.section-title .count {
+  font-family: 'Calibri', sans-serif;
+  font-size: 12px;
+  font-weight: normal;
+  color: #595959;
+  margin-left: auto;
+}
+.ready-header .count { margin-left: 6px; }
+.ready-header .ready-filter {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ready-header .ready-filter .filter-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #595959;
+  letter-spacing: 0.5px;
+}
+.ready-header .ready-filter select {
+  padding: 6px 10px;
+  border: 1px solid #D0D5D2;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  color: #1A1A1A;
+}
+.ready-header .ready-filter select:focus {
+  outline: none;
+  border-color: #17E88F;
+  box-shadow: 0 0 0 2px rgba(23,232,143,0.18);
+}
+
+.featured-grid {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.fg-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.role-group {
+  width: 100%;
+  margin: 0;
+  background: #fff;
+  border: 1px solid #E0E5E1;
+  border-radius: 10px;
+  padding: 12px 15px 6px;
+}
+.role-group-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E0E5E1;
+}
+.role-group-header .role-name {
+  font-family: 'Georgia', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #003F2D;
+}
+.role-group-header .role-group-meta {
+  font-size: 11px;
+  color: #595959;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.role-cards {
+  display: flex;
+  flex-direction: column;
+}
+.featured-card .card-savings {
+  display: inline-block;
+  background: #E6F9F0;
+  color: #00663F;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.featured-card .card-savings.tbd { background: #F0F0F0; color: #999; }
+.featured-card {
+  cursor: pointer;
+  transition: background 0.12s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 6px;
+  border-bottom: 1px solid #F0F2F1;
+  border-radius: 6px;
+}
+.role-cards .featured-card:last-child { border-bottom: none; }
+.featured-card .card-main { min-width: 0; }
+.featured-card:hover { background: #F2FBF7; }
+.featured-card .badge-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.featured-card h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #003F2D;
+  margin-bottom: 2px;
+  line-height: 1.25;
+}
+.featured-card .meta {
+  font-size: 10px;
+  color: #595959;
+  margin-top: 3px;
+}
+.featured-card .impact-bar {
+  height: 3px;
+  background: #F0F0F0;
+  border-radius: 2px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.featured-card .impact-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #17E88F, #50AF78);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.badge-Live { background: #17E88F; color: #003F2D; }
+.badge-LR { background: #B8E5C8; color: #003F2D; }
+.badge-Testing { background: #FFD580; color: #663300; }
+.badge-NotInRoadmap { background: #E0E0E0; color: #595959; }
+.badge-InRoadmap { background: #F0F0F0; color: #595959; }
+.badge-dt { background: transparent; color: #003F2D; border: 1px solid #003F2D; }
+.badge-pri-1 { background: #DDEEEE; color: #003F2D; }
+.badge-pri-2 { background: #B8E5C8; color: #003F2D; }
+.badge-pri-3 { background: #17E88F; color: #003F2D; }
+.badge-pri-na { background: #F0F0F0; color: #999; }
+.badge-Idea { background: #003F2D; color: #17E88F; }
+.badge-BOAVerify { background: #FCE9C7; color: #7A4F00; }
+.badge-NeedsReview { background: #E0E0E0; color: #595959; }
+
+/* Add Idea button + form */
+.add-idea-btn {
+  background: #003F2D;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+.add-idea-btn:hover { background: #17E88F; color: #003F2D; }
+.idea-form label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: #595959;
+  margin-bottom: 5px;
+}
+.idea-form .form-row { margin-bottom: 16px; }
+.idea-form .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.idea-form input[type="text"],
+.idea-form input[type="number"],
+.idea-form select,
+.idea-form textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid #D0D5D2;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1A1A1A;
+  background: #fff;
+  box-sizing: border-box;
+}
+.idea-form textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.idea-form input:focus,
+.idea-form select:focus,
+.idea-form textarea:focus {
+  outline: none;
+  border-color: #17E88F;
+  box-shadow: 0 0 0 2px rgba(23,232,143,0.18);
+}
+.idea-form .req { color: #C0392B; }
+.idea-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+  border-top: 1px solid #F0F2F1;
+  padding-top: 18px;
+}
+.idea-form .btn-primary {
+  background: #003F2D;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.idea-form .btn-primary:hover { background: #17E88F; color: #003F2D; }
+.idea-form .btn-secondary {
+  background: #fff;
+  color: #595959;
+  border: 1px solid #D0D5D2;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.idea-form .btn-secondary:hover { background: #F5F5F5; }
+.idea-form .form-note {
+  font-size: 12px;
+  color: #777;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+#ideaFormMsg {
+  font-size: 13px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  display: none;
+}
+#ideaFormMsg.ok { display: block; background: #E6F9F0; color: #00663F; border: 1px solid #17E88F; }
+#ideaFormMsg.err { display: block; background: #FDECEA; color: #C0392B; border: 1px solid #E6B0AA; }
+
+/* Filter bar */
+.filter-bar {
+  background: #fff;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  border: 1px solid #E0E5E1;
+}
+.filter-bar input, .filter-bar select {
+  padding: 7px 10px;
+  border: 1px solid #D0D5D2;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  color: #1A1A1A;
+}
+.filter-bar input:focus, .filter-bar select:focus {
+  outline: none;
+  border-color: #17E88F;
+  box-shadow: 0 0 0 2px rgba(23,232,143,0.18);
+}
+.filter-bar input[type="search"] { min-width: 220px; flex: 1; }
+.filter-bar .filter-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #595959;
+  letter-spacing: 0.5px;
+}
+.filter-bar .clear-btn {
+  background: #fff;
+  border: 1px solid #D0D5D2;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12px;
+  color: #595959;
+  cursor: pointer;
+  font-family: inherit;
+}
+.filter-bar .clear-btn:hover { background: #F5F5F5; color: #1A1A1A; }
+
+/* Main table */
+.table-container {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #E0E5E1;
+  margin-bottom: 24px;
+}
+table.use-cases {
+  width: 100%;
+  border-collapse: collapse;
+}
+table.use-cases thead {
+  background: #F5F7F6;
+}
+table.use-cases th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #595959;
+  font-weight: 700;
+  border-bottom: 2px solid #E0E5E1;
+  cursor: pointer;
+  user-select: none;
+}
+table.use-cases th:hover { background: #ECEFEE; }
+table.use-cases th.sort-asc::after { content: ' ▲'; font-size: 9px; color: #003F2D; }
+table.use-cases th.sort-desc::after { content: ' ▼'; font-size: 9px; color: #003F2D; }
+table.use-cases td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #F0F2F1;
+  font-size: 13px;
+  vertical-align: top;
+}
+table.use-cases tbody tr {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+table.use-cases tbody tr:hover { background: #FAFBFA; }
+.uc-cell strong { display: block; font-size: 13px; color: #003F2D; margin-bottom: 2px; line-height: 1.3; }
+.uc-cell .uc-summary { font-size: 11px; color: #595959; line-height: 1.35; }
+.hours-cell { font-variant-numeric: tabular-nums; color: #003F2D; font-weight: 600; }
+.models-cell { font-size: 12px; color: #1A1A1A; max-width: 220px; }
+.models-preview { white-space: pre-line; line-height: 1.35; color: #1A1A1A; }
+.empty-state { padding: 40px; text-align: center; color: #999; font-style: italic; }
+.role-cell { font-size: 12px; color: #1A1A1A; }
+.source-cell { font-size: 12px; color: #1A1A1A; }
+.priority-cell { text-align: center; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 30, 20, 0.55);
+  z-index: 1000;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 50px 20px;
+  overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal-container { max-width: 720px; width: 100%; }
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 32px;
+  position: relative;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.25);
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #F0F0F0;
+  border: none;
+  color: #595959;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { background: #E0E0E0; color: #1A1A1A; }
+.modal h2 {
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  color: #003F2D;
+  margin-bottom: 8px;
+  padding-right: 30px;
+}
+.modal .modal-badges { margin-bottom: 16px; display: flex; gap: 6px; flex-wrap: wrap; }
+.modal .field {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F0F2F1;
+}
+.modal .field-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: #595959;
+  margin-bottom: 4px;
+}
+.modal .field-value {
+  font-size: 13px;
+  color: #1A1A1A;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.modal .field-value.muted { color: #999; font-style: italic; }
+.modal .meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.modal .meta-grid .field { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+
+.legend {
+  background: #fff;
+  border: 1px solid #E0E5E1;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #595959;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+
+.footer {
+  margin-top: 24px;
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+}
+/* === Tabs === */
+.tab-bar { display:flex; gap:4px; margin:0 0 18px; border-bottom:2px solid #e3e8e6; }
+.tab-btn { appearance:none; border:none; background:none; padding:12px 20px; font:inherit; font-weight:600; font-size:15px; color:#5a6b64; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; }
+.tab-btn:hover { color:#003F2D; }
+.tab-btn.active { color:#003F2D; border-bottom-color:#003F2D; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+/* === Live-load states === */
+.loading-state, .error-state { padding:24px; text-align:center; color:#7a8a83; font-size:14px; }
+.error-state { color:#b00020; }
+.kpi-row .loading-state { grid-column:1 / -1; }
+/* === Ideas tab === */
+#ideasList { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+.idea-card { cursor:pointer; }
+.idea-sub { margin-top:8px; font-style:italic; color:#8a9a93; }
+</style>
+</head>
+<body>
+
+<div class="dash-header">
+  <h1>IFM <span class="accent">AI</span> Use Case Dashboard</h1>
+  <button class="add-idea-btn" id="addIdeaBtn">+ Add Idea</button>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="usecases">Use Cases</button>
+  <button class="tab-btn" data-tab="ideas">New Ideas</button>
+</div>
+
+<div id="tab-usecases" class="tab-panel active">
+
+<div class="kpi-row" id="kpiRow">
+<div class="kpi total"><div class="label">Total AI Initiatives</div><div class="value">148</div></div>
+<div class="kpi ready"><div class="label">Ready for Deployment</div><div class="value">27</div></div>
+<div class="kpi testing"><div class="label">In D&amp;T Testing</div><div class="value">5</div></div>
+<div class="kpi roadmap"><div class="label">In D&amp;T Roadmap</div><div class="value">25</div></div>
+<div class="kpi needs"><div class="label">Needs Review by D&amp;T</div><div class="value">91</div></div>
+<div class="kpi enabled"><div class="label">In Solutioning Tools</div><div class="value">5</div></div>
+<div class="kpi hours"><div class="label">Avg Hours Saved per Use Case</div><div class="value">109</div></div>
+</div>
+
+<div class="section-title ready-header">
+  <span>Ready for Deployment</span>
+  <span class="count" id="readyCount">27 ready</span>
+  <span class="ready-filter">
+    <span class="filter-label">Filter role</span>
+    <select id="readyRoleFilter"><option value="">All roles</option></select>
+  </span>
+</div>
+<div class="featured-grid" id="featuredGrid">
+<div class="featured-card" data-row="27"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Event brief/summary messaging to attendees</h3><div class="meta">Experience · Event Planner</div></div>
+<div class="featured-card" data-row="125"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Work Order Management / Financials</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: High</div></div>
+<div class="featured-card" data-row="23"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Automatic Planning and scheduling with Maintenance Optimization Engine</h3><div class="meta">FM · CMMS Admin, Planner/Scheduler</div><div class="meta" style="margin-top:8px;">SA Priority: High</div></div>
+<div class="featured-card" data-row="19"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>City Guides</h3><div class="meta">Experience · Receptionist</div></div>
+<div class="featured-card" data-row="41"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Maintenace Optimization Engine</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: High</div></div>
+<div class="featured-card" data-row="18"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Communications to occupants</h3><div class="meta">Experience · All Experience</div></div>
+<div class="featured-card" data-row="129"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Vendor Management</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: High</div></div>
+<div class="featured-card" data-row="127"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>FCI / Site Visits</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: Med</div></div>
+<div class="featured-card" data-row="131"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>LL Management / TIA / OVLA</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: Med</div></div>
+<div class="featured-card" data-row="144"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Analytics &amp; Insights</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Med</div></div>
+<div class="featured-card" data-row="143"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Inventory Recon</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Med</div></div>
+<div class="featured-card" data-row="141"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>WO Close &amp; Log</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Med</div></div>
+<div class="featured-card" data-row="14"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Sentiment gathering</h3><div class="meta">Experience · All Experience</div></div>
+<div class="featured-card" data-row="142"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>P-card Receipt Validation</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="138"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Parts Planning</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="13"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Priority Change (Agentic)</h3><div class="meta">FM · Dispatcher / FM</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="12"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Asset Manual Search and Reference NLP Interface</h3><div class="meta">FM · Tech</div><div class="meta" style="margin-top:8px;">SA Priority: High · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="11"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Image-to-Service-Request (Vision Models)</h3><div class="meta">FM · Occupant</div><div class="meta" style="margin-top:8px;">SA Priority: High · D&amp;T sourced · In solutioning tools</div></div>
+<div class="featured-card" data-row="5"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Asset Attach</h3><div class="meta">FM · Dispatcher / Tech</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="147"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Asset Performance Scoring</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="101"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Automatic Translation</h3><div class="meta">Experience · WEM</div></div>
+<div class="featured-card" data-row="90"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Climate Risk Modeling</h3><div class="meta">E&amp;S · Energy Analyst</div><div class="meta" style="margin-top:8px;">In solutioning tools</div></div>
+<div class="featured-card" data-row="2"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Completion Notes Quality Scoring</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: High · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="3"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Contract Expiration Radar</h3><div class="meta">Procurement · Proc Analyst</div><div class="meta" style="margin-top:8px;">SA Priority: Med</div></div>
+<div class="featured-card" data-row="121"><div class="badge-row"><span class="badge badge-LR">Limited Release</span><span class="badge badge-dt">D&amp;T</span></div><h3>Delay Reasons (Agentic)</h3><div class="meta">FM · Dispatcher / FM</div><div class="meta" style="margin-top:8px;">SA Priority: Low · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="83"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Duplicate WO Detection at Submission</h3><div class="meta">FM</div><div class="meta" style="margin-top:8px;">SA Priority: High · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="103"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Email to SR Creation</h3><div class="meta">FM · Dispatcher / Call Center Agent</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="130"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Emergency Response / Management</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="135"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>FCI Photo Upload</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="149"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>FM Review &amp; Approval</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="8"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Natural Language Filter/Search (WOs/Activities)</h3><div class="meta">FM · Tech / Dispatcher / FM</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="140"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>On Site Execution</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="133"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Other (initiatives, environment, compliance, misc.)</h3><div class="meta">FM · FM</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="10"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Quick Closure (Agentic)</h3><div class="meta">FM · FM / QA / Dispatcher</div><div class="meta" style="margin-top:8px;">SA Priority: Low · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="6"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Resource Hub — Ellis AI QAR</h3><div class="meta">FM · Tech / FM</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="4"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Service Classification Suggestions</h3><div class="meta">FM · Dispatcher / Call Center Agent</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="7"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Service Request Summary</h3><div class="meta">FM · FM / Account Manager / Tech</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="84"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>SLA Breach Prediction</h3><div class="meta">FM</div><div class="meta" style="margin-top:8px;">SA Priority: High · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="9"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Stuck Activities (Agentic)</h3><div class="meta">FM · Dispatcher / FM</div><div class="meta" style="margin-top:8px;">SA Priority: Med · D&amp;T sourced</div></div>
+<div class="featured-card" data-row="89"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>Sustainability Insights Compliance</h3><div class="meta">E&amp;S · Energy Analyst</div><div class="meta" style="margin-top:8px;">In solutioning tools</div></div>
+<div class="featured-card" data-row="134"><div class="badge-row"><span class="badge badge-Live">Live</span></div><h3>WO Receipt &amp; Diagnostic</h3><div class="meta">FM · Technician</div><div class="meta" style="margin-top:8px;">SA Priority: Low</div></div>
+<div class="featured-card" data-row="78"><div class="badge-row"><span class="badge badge-Live">Live</span><span class="badge badge-dt">D&amp;T</span></div><h3>Work Order / SR Bundling</h3><div class="meta">FM</div><div class="meta" style="margin-top:8px;">SA Priority: High · D&amp;T sourced</div></div>
+</div>
+
+<div class="section-title" style="margin-top:32px;">
+  All Use Cases
+  <span class="count" id="totalCount">152 of 152</span>
+</div>
+
+<div class="filter-bar">
+  <input type="search" id="searchInput" placeholder="Search by name, summary, role, or source…" autocomplete="off">
+  <span class="filter-label">Status</span>
+  <select id="statusFilter"><option value="">All</option></select>
+  <span class="filter-label">Service Line</span>
+  <select id="slFilter"><option value="">All</option></select>
+  <span class="filter-label">Impacted Role</span>
+  <select id="roleFilter"><option value="">All</option></select>
+  <span class="filter-label">Source</span>
+  <select id="sourceFilter"><option value="">All</option></select>
+  <span class="filter-label">SA Priority</span>
+  <select id="priFilter">
+    <option value="">All</option>
+    <option value="3">3 — High</option>
+    <option value="2">2 — Med</option>
+    <option value="1">1 — Low</option>
+    <option value="0">Unassigned</option>
+  </select>
+  <button class="clear-btn" id="clearBtn">Clear filters</button>
+</div>
+
+<div class="table-container">
+  <table class="use-cases">
+    <thead>
+      <tr>
+        <th data-sort="sa_priority_rank" class="sort-desc">SA Priority</th>
+        <th data-sort="use_case">Use Case</th>
+        <th data-sort="impacted_role">Impacted Role</th>
+        <th data-sort="source">Source</th>
+        <th data-sort="status">Status</th>
+        <th data-sort="service_line">Service Line</th>
+        <th data-sort="dt_tech">D&amp;T Tech Dependency</th>
+        <th data-sort="hours_saved">Savings (hrs/fte/yr)</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+<tr data-row="45"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>AI Inventory Management Software</strong><div class="uc-summary">AI inventory management software to automate tracking and analysis of procured parts &amp; mat…</div></td><td class="role-cell">Engineering</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="87"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>AI Multi-Channel Intake &amp; De-duplication</strong><div class="uc-summary">Unifies service requests arriving via phone, email, tenant portal, and sensor alerts into …</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="22"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>AI Priority Ranking Engine (Capital Planning Scoring Model)</strong><div class="uc-summary">Weighted scoring model (e.g. 30% condition, 25% compliance risk, 25% criticality, 20% cost…</div></td><td class="role-cell">Capital Planning</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">255</td></tr>
+<tr data-row="43"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>AI-Assisted Work Order Closeout</strong><div class="uc-summary">AI auto-populates WO completion fields via voice capture or structured prompts; tech confi…</div></td><td class="role-cell">—</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">26</td></tr>
+<tr data-row="20"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>AI-Powered Capital Planning Scenario Optimization</strong><div class="uc-summary">Optimisation engine takes budget, compliance deadlines, condition thresholds, and critical…</div></td><td class="role-cell">Capital Planning</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">218</td></tr>
+<tr data-row="12"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Asset Manual Search and Reference NLP Interface</strong><div class="uc-summary">NLP interface for searching and referencing asset manuals.</div></td><td class="role-cell">Tech</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">1</td></tr>
+<tr data-row="23"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Automatic Planning and scheduling with Maintenance Optimization Engine</strong><div class="uc-summary">Utilize vantage analytics, MOE, PM work order plans</div></td><td class="role-cell">CMMS Admin, Planner/Scheduler</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">425</td></tr>
+<tr data-row="102"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Call Center Bot</strong><div class="uc-summary">Automatically converts call transcripts into service requests, ensuring accurate and effic…</div></td><td class="role-cell">Call Center Agent / Dispatcher</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="2"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Completion Notes Quality Scoring</strong><div class="uc-summary">AI scores technician completion notes for completeness and prompts users to add missing de…</div></td><td class="role-cell">Technician</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="77"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Compliance Automation (PM, Waivers, Records Governance)</strong><div class="uc-summary">AI-assisted PM compliance tracking, waiver management, and records governance: auto-genera…</div></td><td class="role-cell">Compliance</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="91"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Contract Extension Letter Generator</strong><div class="uc-summary">Automate the end-to-end generation and distribution of month-to-month and one-year contrac…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="83"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Duplicate WO Detection at Submission</strong><div class="uc-summary">AI layer sitting between the submission form and Corrigo compares incoming WOs against ope…</div></td><td class="role-cell">—</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="28"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>GRMS Compliance Chase Agent</strong><div class="uc-summary">Automates supplier compliance enforcement actions with tailored emails, escalation cadence…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">750</td></tr>
+<tr data-row="53"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Having the Right Parts at the &quot;Point of Sale&quot;</strong><div class="uc-summary">Tech predicts required consumables and parts per PM event; triggers drop-ship delivery to …</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="11"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Image-to-Service-Request (Vision Models)</strong><div class="uc-summary">Vision models interpret photos of facility issues and automatically generate compliant ser…</div></td><td class="role-cell">Occupant</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">1</td></tr>
+<tr data-row="15"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Intelligent Asset Data Reconciliation</strong><div class="uc-summary">Entity resolution model uses fuzzy matching across asset ID, make/model, serial number, lo…</div></td><td class="role-cell">Capital Planning</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">50</td></tr>
+<tr data-row="40"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Intelligent Work Order Routing &amp; Dispatch</strong><div class="uc-summary">AI assigns WOs to technicians based on proximity, skill match, current workload, and asset…</div></td><td class="role-cell">Planner Scheduler</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Testing">In Testing</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">130</td></tr>
+<tr data-row="113"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Invoice Anomaly Detection</strong><div class="uc-summary">Detect anomalies in invoices during the close-out process, reducing errors and ensuring fi…</div></td><td class="role-cell">Finance / Sourcing / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="39"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Knowledge Base / AI Troubleshooting at Point of Work</strong><div class="uc-summary">Context-aware AI assistant surfaced at asset level: fault codes, repair history, OEM docum…</div></td><td class="role-cell">—</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Testing">In Testing</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="46"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Lease Auditing</strong><div class="uc-summary">AI-powered lease abstraction and audit engine — uses the lease abstraction engine as a dat…</div></td><td class="role-cell">Lease Admin</td><td class="source-cell">Property Management</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Property Management</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="41"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Maintenace Optimization Engine</strong><div class="uc-summary">AI tool to Assess high and low performing assets to reduce PMs on high performaing assets …</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">144</td></tr>
+<tr data-row="79"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Proactive WO Generation from Failure Patterns</strong><div class="uc-summary">Failure-pattern engine analyses cohorts of assets (e.g. three belt failures on rooftop uni…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="97"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>QBR Data Assembly</strong><div class="uc-summary">Automates data collection and slide preparation for quarterly reviews. Agent should pull s…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="50"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Skill Verification Planning and Scheduling</strong><div class="uc-summary">Validated skill competency data enables AI-optimized technician scheduling — right skill, …</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">540</td></tr>
+<tr data-row="84"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>SLA Breach Prediction</strong><div class="uc-summary">Predictive models flag service requests / work orders at risk of SLA breach early so FMs c…</div></td><td class="role-cell">—</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="93"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Supplier Onboarding Orchestration</strong><div class="uc-summary">Automates onboarding workflow from MSA receipt through full system setup.  Agent should ac…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="129"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Vendor Management</strong><div class="uc-summary">AI continuously monitors compliance, replacing manual tracking and shifting FMs to alert r…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Predictive AP Invoice Rx Delay
+• [LIVE] Invoice Amount Anomaly Detectio…</div></td><td class="hours-cell">104</td></tr>
+<tr data-row="94"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Vendor Verification Routine (VVR) Automation</strong><div class="uc-summary">Automates periodic compliance attestations with reminders, escalation, and dashboards. Age…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="78"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Work Order / SR Bundling</strong><div class="uc-summary">AI identifies opportunities to bundle reactive (corrective) and preventive work for the sa…</div></td><td class="role-cell">—</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="125"><td class="priority-cell"><span class="badge badge-pri-3">3 — High</span></td><td class="uc-cell"><strong>Work Order Management / Financials</strong><div class="uc-summary">AI automates repetitive FM processes, and PO/Invoicing. FM is Responsible Party.
+
+Narrativ…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Predictive AP Invoice Rx Delay
+• [LIVE] Invoice Amount Anomaly Detectio…</div></td><td class="hours-cell">624</td></tr>
+<tr data-row="76"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>AI Knowledge Capture from Retiring Technicians (&quot;Fix Centre&quot;)</strong><div class="uc-summary">41% of trades professionals are expected to retire by 2031. Structured knowledge-capture p…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="82"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>AI-Drafted Budget Commentary &amp; Utility Invoice Matching</strong><div class="uc-summary">AI drafts the monthly budget narrative from actuals vs. plan (currently formulaic but time…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="61"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>AI-Driven PO Routing</strong><div class="uc-summary">Use AI to triage work orders and forward POs to the right vendor quickly.</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="144"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Analytics &amp; Insights</strong><div class="uc-summary">AI tracks KPIs and surfaces continuous improvement opportunities across the portfolio. FM …</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] SR Feedback Trends
+• [TEST] Building Intelligence
+• [LIVE] Single Pane o…</div></td><td class="hours-cell">26</td></tr>
+<tr data-row="36"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Approval Threshold Anomaly Detection</strong><div class="uc-summary">AI rule engine identifies patterns across related WOs (same vendor, same location, same ti…</div></td><td class="role-cell">Compliance</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">22</td></tr>
+<tr data-row="44"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>AR / HoloLens (Remote Expert via Smart FM ROC)</strong><div class="uc-summary">Augmented reality enables Smart FM ROC engineers to see through a field technician&#x27;s persp…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="5"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Asset Attach</strong><div class="uc-summary">Based on SR description, location and SC, suggest assets to users when creating SRs.</div></td><td class="role-cell">Dispatcher / Tech</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="58"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Asset Life Extension via AI-Optimized PM Frequency</strong><div class="uc-summary">Use freed technician capacity (from workflow AI gains) to run additional proactive PM cycl…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="17"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Automated Anomaly Detection (Capital Asset Data)</strong><div class="uc-summary">ML model trained on historical asset data flags anomalies in real time as records are subm…</div></td><td class="role-cell">Capital Planning</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">100</td></tr>
+<tr data-row="136"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Barrier Anticipation</strong><div class="uc-summary">AI flags parts, access, and manpower risks before scheduling begins. Technician Responsibl…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Predict Parts and Tools
+• [DEV] Predict Cost and Labor
+• [DEV] NTE (Not …</div></td><td class="hours-cell">26</td></tr>
+<tr data-row="75"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Chargeable SR Identification</strong><div class="uc-summary">NLP flags service requests likely to be chargeable based on description and contract rules…</div></td><td class="role-cell">—</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="112"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Client Spend Limit Predictor</strong><div class="uc-summary">System that forecasts expected increase in client spend limits before work begins.
+
+[FLAG]…</div></td><td class="role-cell">FM / Account Manager / Finance</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="95"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Compliance Override Detection</strong><div class="uc-summary">Detects unauthorized compliance overrides and alerts stakeholders. Specifically detect and…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="55"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Consumables Inventory Optimization</strong><div class="uc-summary">AI-driven stocking recommendations by site based on PM schedule, asset inventory, and hist…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="3"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Contract Expiration Radar</strong><div class="uc-summary">Tracks upcoming expirations and drafts outreach to Sourcing Managers with recommendations.…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="88"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Conversational AI for Capital Plan Querying</strong><div class="uc-summary">Conversational query layer on top of Capital Planner data. Stakeholder types or speaks a &quot;…</div></td><td class="role-cell">Capital Planning</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="120"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Downtime Notifier (Agentic)</strong><div class="uc-summary">Notify relevant persons when a critical asset will have downtime.
+
+[FLAG] Status badge not…</div></td><td class="role-cell">FM / Tech / Account Manager</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="54"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Dynamic Job Plan Generation</strong><div class="uc-summary">AI generates asset-specific PM checklists based on asset age, last service outcome, sensor…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="21"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Dynamic Service Adjustment (Occupancy-Triggered)</strong><div class="uc-summary">Based on Amazon&#x27;s expected footprint changes and real-time occupancy signals, automaticall…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">240</td></tr>
+<tr data-row="103"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Email to SR Creation</strong><div class="uc-summary">Automatically converts WO creation emails to service requests, ensuring accurate and effic…</div></td><td class="role-cell">Dispatcher / Call Center Agent</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="106"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Emergency/Urgent SRs</strong><div class="uc-summary">Prioritizes and manages emergency &amp; urgent work orders using AI to ensure timely and effec…</div></td><td class="role-cell">Dispatcher</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="127"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>FCI / Site Visits</strong><div class="uc-summary">AI mobile checklists and reports enable phone inspections, letting FMs focus site visits w…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Image Analysis &amp; Auto-Tagging
+• [LIVE] Image to SR Creation
+• [LIVE] Ass…</div></td><td class="hours-cell">52</td></tr>
+<tr data-row="26"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>FCI Exemption Process (Automated)</strong><div class="uc-summary">AI predicts which buildings qualify for FCI exemption each year based on prior scores + ca…</div></td><td class="role-cell">Capital Planning</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">500</td></tr>
+<tr data-row="116"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Frequent Declines (Agentic)</strong><div class="uc-summary">Identifies activities that got rejected multiple times by Providers.
+
+[FLAG] Status badge …</div></td><td class="role-cell">Dispatcher / Sourcing</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="86"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Guided Mobile Site Inspection (Phone-Eligible Sites)</strong><div class="uc-summary">Guided mobile checklists with AI-generated reports for phone inspections and lower-priorit…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="99"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Inbox Triage and Action Agent</strong><div class="uc-summary">Converts emails into prioritized task queues with contextual integration. Reduce time spen…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="117"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Ineligible Assignments (Agentic)</strong><div class="uc-summary">Identifies activities that are at risk due to the assigned provider not having the correct…</div></td><td class="role-cell">Dispatcher</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="143"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Inventory Recon</strong><div class="uc-summary">AI updates stock levels, reconciles usage, and triggers replenishment alerts. Technician R…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Invoice Amount Anomaly Detection
+• [DEV] Predict Parts and Tools
+• [LIV…</div></td><td class="hours-cell">26</td></tr>
+<tr data-row="62"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Large Building Language Model (LBLM)</strong><div class="uc-summary">Purpose-built LLM trained on CBRE IFM operational data — asset behavior, WO history, PM ou…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="131"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>LL Management / TIA / OVLA</strong><div class="uc-summary">AI parses lease abstracts, flags dates and issues, removing manual review burden from FM. …</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Lease Abstraction</div></td><td class="hours-cell">52</td></tr>
+<tr data-row="8"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Natural Language Filter/Search (WOs/Activities)</strong><div class="uc-summary">Get a filtered list of WOs/activities using natural language queries.</div></td><td class="role-cell">Tech / Dispatcher / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="107"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Natural Language Query Interface</strong><div class="uc-summary">Conversational search interface to find information using everyday language instead of com…</div></td><td class="role-cell">Tech / Dispatcher / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="111"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>NTE (Not To Exceed) Prediction</strong><div class="uc-summary">System to suggest optimal initial NTE values based on historical NTE change patterns.
+
+[FL…</div></td><td class="role-cell">FM / Sourcing</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="57"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Occupancy-Based Building Systems Adjustment</strong><div class="uc-summary">Integrate occupancy/utilization data (Amazon has visual tracking tech) to auto-adjust HVAC…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="48"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>On-Demand Rate Optimization (Variable Labor Pool)</strong><div class="uc-summary">AI-optimized deployment of mobile/variable technician pool — dynamically assign on-demand …</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="115"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>PM Pushed (Agentic)</strong><div class="uc-summary">Identifies PMs that are consistently getting pushed out.
+
+[FLAG] Status badge not indicate…</div></td><td class="role-cell">Planner/Scheduler / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="123"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>PO Failure (Agentic)</strong><div class="uc-summary">Identify activities at risk because of failed PO (Purchase Order) generation.
+
+[FLAG] Stat…</div></td><td class="role-cell">Sourcing / Procurement / Dispatcher</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="96"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Post-Closure Billing Leakage Detection</strong><div class="uc-summary">Identifies billing/activity after site closure and flags for review. Trigger is a CAF‑proc…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="56"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Post-PM Data Extraction &amp; Asset Intelligence</strong><div class="uc-summary">Structured extraction of field observations from completed WOs into asset health records; …</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="122"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>PR Failure (Agentic)</strong><div class="uc-summary">Identify activities at risk because of failed PR (Purchase Requisition) generation.
+
+[FLAG…</div></td><td class="role-cell">Sourcing / Procurement / Dispatcher</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="30"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Pre-Work Prep Automation</strong><div class="uc-summary">Auto-generate prep package 24 hrs before dispatch: required tools, consumables, access cre…</div></td><td class="role-cell">FC</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">936</td></tr>
+<tr data-row="13"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Priority Change (Agentic)</strong><div class="uc-summary">Identifies Service Requests that need to be P1, gets user approval, modifies the priority …</div></td><td class="role-cell">Dispatcher / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">2</td></tr>
+<tr data-row="110"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Query an Asset</strong><div class="uc-summary">Natural language chat on the maintenance history of an asset. Example: &quot;When was the belt …</div></td><td class="role-cell">Tech</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Testing">In Testing</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="6"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Resource Hub — Ellis AI QAR</strong><div class="uc-summary">Centralizes resources and information, leveraging AI to provide relevant and timely access…</div></td><td class="role-cell">Tech / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="35"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Risk Reduction (Automation of Error-Prone Processes)</strong><div class="uc-summary">Automate data entry, compliance checklist completion, and regulatory reporting to reduce h…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">1,200</td></tr>
+<tr data-row="137"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Schedule Optimization</strong><div class="uc-summary">AI sequences work using historical data and failure prediction across the portfolio. Plann…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Automated Assignments using TimeFold.AI
+• [DEV] WO Volume Forecast</div></td><td class="hours-cell">26</td></tr>
+<tr data-row="114"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Sentiment Analysis &amp; Alert System</strong><div class="uc-summary">Real-time monitoring of comments to detect and alert stakeholders about urgent or critical…</div></td><td class="role-cell">FM / Account Manager</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="4"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Service Classification Suggestions</strong><div class="uc-summary">Based on the description entered, suggest service classifications (SCs) to the user during…</div></td><td class="role-cell">Dispatcher / Call Center Agent</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="7"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Service Request Summary</strong><div class="uc-summary">Generate a SR summary based on all the SR data — work orders, activities, material consume…</div></td><td class="role-cell">FM / Account Manager / Tech</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="108"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Smart FM Integration — Live Meter Readings &amp; Asset Health</strong><div class="uc-summary">Smart FM integration providing live meter readings and asset health.</div></td><td class="role-cell">Tech / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Testing">In Testing</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="105"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>SR/WO Volume Forecast</strong><div class="uc-summary">Predict future workload using past trends and seasonal factors to help plan for resources.…</div></td><td class="role-cell">FM / Planner</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="16"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Standards Compliance Auto-Check (Uniformat II / RSMeans Rules Engine)</strong><div class="uc-summary">Rule-based AI engine with embedded Uniformat II, RSMeans, and configurable client taxonomy…</div></td><td class="role-cell">Capital Planning</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">50</td></tr>
+<tr data-row="9"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Stuck Activities (Agentic)</strong><div class="uc-summary">Identifies activities with no movement for a certain duration (e.g., P1 → 15 mins, P2 → 1 …</div></td><td class="role-cell">Dispatcher / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="92"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Supplier Prioritization by Spend</strong><div class="uc-summary">Prioritizes compliance work using spend data and flags inactive suppliers. Agent should en…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="49"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Talent Sourcing</strong><div class="uc-summary">AI-assisted screening and competency matching for FM technician recruitment; prioritizes c…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="141"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>WO Close &amp; Log</strong><div class="uc-summary">Geofencing auto-logs arrival; AI (agent) validates record completeness before closure. Tec…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Ops Agents 
+• [LIVE] Completion Notes Detail Score
+• [DEV] PCR Detail S…</div></td><td class="hours-cell">26</td></tr>
+<tr data-row="124"><td class="priority-cell"><span class="badge badge-pri-2">2 — Med</span></td><td class="uc-cell"><strong>Work Verification (Agentic)</strong><div class="uc-summary">Identify activities that were closed without completion notes, proofs of completion, costs…</div></td><td class="role-cell">FM / QA</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="147"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Asset Performance Scoring</strong><div class="uc-summary">The AI engine scores each asset by SLA pass rate, corrective WO linkage, and PM completion…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Asset Intelligence 2.0
+• [LIVE] Asset Summary
+• [LIVE] SLA Breach + Expl…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="132"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Attending Meetings</strong><div class="uc-summary">AI transcribes calls, extracts actions, and routes tickets, saving time across engineering…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Phone/Voice Transcription
+• [LIVE] Service Request Summary (Detailed + C…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="109"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Building Layouts — Wayfinding &amp; Guided Navigation</strong><div class="uc-summary">Building layouts provide wayfinding and guided navigation paths for Technicians.
+
+[FLAG] S…</div></td><td class="role-cell">Tech</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="126"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Client Care &amp; Support</strong><div class="uc-summary">Human-led activity — no AI use case defined in current scope.
+
+Narrative:
+Client Care is h…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Sentiment Analysis &amp; Alert System
+• [DEV] SR Feedback Trends
+• [DEV] Cli…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="151"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Continuous Monitoring &amp; Refinement</strong><div class="uc-summary">AI tracks post-change asset performance, flagging units where new corrective WOs emerge af…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Ops Agents
+• [DEV] WO Volume Forecast
+• [DEV] Asset Intelligence 2.0
+• …</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="100"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Cross-System Update Verification</strong><div class="uc-summary">Detects inconsistencies across systems and produces exception reports. Periodically reconc…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="146"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Data Ingestion (Maintenance Optimization Engine)</strong><div class="uc-summary">PM and corrective work order data is extracted from TriRiga and Service Insight across all…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Asset Attach
+• [TEST] Query an Asset
+• [DEV] Asset Intelligence 2.0
+• […</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="121"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Delay Reasons (Agentic)</strong><div class="uc-summary">Identify delay reasons for activities that delayed beyond a reasonable amount.</div></td><td class="role-cell">Dispatcher / FM</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-LR">Limited Release</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="130"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Emergency Response / Management</strong><div class="uc-summary">Human-led activity — no AI use case defined in current scope.
+
+Narrative:
+Emergencies need…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Risk Flags
+• [LIVE] Ops Agents</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="135"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>FCI Photo Upload</strong><div class="uc-summary">Technician captures and uploads Facility Condition Index photos; AI tags asset, location, …</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Image Analysis &amp; Auto-Tagging
+• [LIVE] Image to SR Creation
+• [LIVE] Ass…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="149"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>FM Review &amp; Approval</strong><div class="uc-summary">Facility Manager reviews flagged assets and AI recommendations. Human judgment applied for…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] NLQ – Natural Language Querying
+• [LIVE] Service Request Summary
+• [TEST…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="148"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Frequency Recommendation</strong><div class="uc-summary">AI recommends PM frequency adjustments — reductions or increases — categorized by asset cl…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Maintenance Optimization Engine
+• [DEV] Asset Intelligence 2.0
+• [DEV] …</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="118"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Long Pause (Agentic)</strong><div class="uc-summary">Identifies activities that are stuck in the &quot;Pause&quot; status.
+
+[FLAG] Status badge not indic…</div></td><td class="role-cell">Dispatcher</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="98"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Market Intelligence On-Demand</strong><div class="uc-summary">Enables analyst-driven supplier research via external data sources. Enable analyst‑initiat…</div></td><td class="role-cell">Proc Analyst</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="119"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Multiple Action (Agentic)</strong><div class="uc-summary">Identifies activities that have an unreasonably high volume of actions.
+
+[FLAG] Status bad…</div></td><td class="role-cell">Dispatcher / QA</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="140"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>On Site Execution</strong><div class="uc-summary">Technician performs the maintenance task safely on site. 
+
+Narrative:
+The physical work is…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Tech App Chat Bot (QaR)
+• [DEV] Voice-to-Chat Assistant / SME Access</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="133"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Other (initiatives, environment, compliance, misc.)</strong><div class="uc-summary">Includes different initiatives, environment and compliance, and other miscellaneous activi…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] NLQ – Natural Language Querying
+• [LIVE] ePermit</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="142"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>P-card Receipt Validation</strong><div class="uc-summary">AI extracts and matches P-card receipts to WO line items, flags policy exceptions and dupl…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Invoice Amount Anomaly Detection
+• [TEST] Invoice Detail Validation
+• […</div></td><td class="hours-cell">10</td></tr>
+<tr data-row="138"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Parts Planning</strong><div class="uc-summary">AI cross-references upcoming WOs with live stock, generates pick lists and reorder alerts.…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Predict Parts and Tools
+• [LIVE] Ops Agents (for alerting)</div></td><td class="hours-cell">10</td></tr>
+<tr data-row="60"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Portfolio Glide Path &amp; Contraction Modeling</strong><div class="uc-summary">AI-driven scenario modeling: as Amazon&#x27;s portfolio contracts, dynamically recalculate opti…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="10"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Quick Closure (Agentic)</strong><div class="uc-summary">Identifies activities that closed/completed in unreasonably less time.</div></td><td class="role-cell">FM / QA / Dispatcher</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="150"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Schedule Implementation</strong><div class="uc-summary">Approved changes are applied in the CMMS. AI auto-updates PM triggers and recalculates pro…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Job Plan Steps adjustments
+• [LIVE] Ops Agents
+• [DEV] WO Volume Forecas…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="128"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Service Line Partner Support</strong><div class="uc-summary">Human-led activity — no AI use case defined in current scope.
+
+Narrative:
+Service-line par…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Client Intelligence
+• [DEV] Governance PPT</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="104"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>SR Feedback Trends</strong><div class="uc-summary">Aggregates and analyzes customer feedback to provide actionable summaries, helping to impr…</div></td><td class="role-cell">FM / Account Manager</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="139"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Technician Dispatch</strong><div class="uc-summary">Optimized technician assignment dispatched with all WO details automatically. 
+
+Narrative:…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [DEV] Automated Assignments using TimeFold.AI
+• [DEV] Truck Roll Prediction</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="59"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>Training (AI-Accelerated)</strong><div class="uc-summary">AI delivers personalized, on-demand training for technicians — adaptive learning paths bas…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="145"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>WO Heat Map &amp; Recurring Issues</strong><div class="uc-summary">AI analyses CMMS history to surface hot spots — flagging any site exceeding threshold WO c…</div></td><td class="role-cell">FM</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] SLA Breach + Explainability
+• [TEST]  Recurring Issues based on Duplica…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="134"><td class="priority-cell"><span class="badge badge-pri-1">1 — Low</span></td><td class="uc-cell"><strong>WO Receipt &amp; Diagnostic</strong><div class="uc-summary">AI ingests and classifies WOs, then surfaces service history, OEM manuals, and likely root…</div></td><td class="role-cell">Technician</td><td class="source-cell">Solution Architect Team BOA</td><td><span class="badge badge-Live">Live</span></td><td>FM</td><td class="models-cell"><div class="models-preview">• [LIVE] Service Classification Suggestion
+• [LIVE] Duplicate Check
+• [LIVE] Ass…</div></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="85"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>AI Lease Abstract Agent (OVLA / CAM / Critical Dates)</strong><div class="uc-summary">AI agent parses lease abstracts and alerts on critical dates and CAM discrepancies, removi…</div></td><td class="role-cell">Lease Admin</td><td class="source-cell">Property Management</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Property Management</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="81"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>AI Meeting Assistant (Transcription, Actions, Routing)</strong><div class="uc-summary">AI assistant that transcribes meetings, extracts action items, and routes them to the righ…</div></td><td class="role-cell">—</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>All</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="69"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>AI Test Fits (Cubic)</strong><div class="uc-summary">AI-generated space test fits — rapid layout scenarios for new, consolidated, or redesigned…</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="80"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>AI Vendor Compliance Monitoring (SLA / COI / Invoice)</strong><div class="uc-summary">Continuous AI monitoring of vendor SLA adherence, COI expiry, and invoice compliance repla…</div></td><td class="role-cell">Procurement</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="51"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>AI-Generated Invoices from Job Completion Data</strong><div class="uc-summary">Converts technician voice notes, photos, and job-close data directly into a compliant, lin…</div></td><td class="role-cell">Procurement</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">520</td></tr>
+<tr data-row="47"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Automated Deal Sheet / Whitepaper Creation</strong><div class="uc-summary">Streamline the process to create Amazon deal summaries and transaction whitepapers — AI au…</div></td><td class="role-cell">—</td><td class="source-cell">Transaction Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>TM / Portfolio Strategy</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="52"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Automated SLA Monitoring &amp; Invoice Compliance</strong><div class="uc-summary">SLA monitor on top of IWMS fires escalations at 80% of the SLA window. Coupa invoice valid…</div></td><td class="role-cell">Procurement</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Procurement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">520</td></tr>
+<tr data-row="101"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Automatic Translation</strong><div class="uc-summary">Ai Generated instant translations for documents, sites, meeting information.</div></td><td class="role-cell">WEM</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="19"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>City Guides</strong><div class="uc-summary">AI Generated communication template available to each employee or visitor with site arriva…</div></td><td class="role-cell">Receptionist</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">150</td></tr>
+<tr data-row="90"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Climate Risk Modeling</strong><div class="uc-summary">Automatically identify climate risk across a portfolio. Value add not a time saver.</div></td><td class="role-cell">Energy Analyst</td><td class="source-cell">E&amp;S</td><td><span class="badge badge-Live">Live</span></td><td>E&amp;S</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="18"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Communications to occupants</strong><div class="uc-summary">A libraty of auto-generated templates to communicate in a consistent format and tone on al…</div></td><td class="role-cell">All Experience</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">130</td></tr>
+<tr data-row="29"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Cost Management</strong><div class="uc-summary">AI-powered cost forecasting and variance detection across the project portfolio.</div></td><td class="role-cell">—</td><td class="source-cell">T&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>PJM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="65"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Deal Coach</strong><div class="uc-summary">AI tool: Analyzes CBRE&#x27;s lease database to coach future negotiations - how far can you pus…</div></td><td class="role-cell">—</td><td class="source-cell">Transaction Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>TM / Portfolio Strategy</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="27"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Event brief/summary messaging to attendees</strong><div class="uc-summary">AI Generated communication template to be sent to attendees with site arrival information,…</div></td><td class="role-cell">Event Planner</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">650</td></tr>
+<tr data-row="24"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Event Checklist Generator</strong><div class="uc-summary">Automatically generated summaries that pulls data from BOE, set up, vendor data, occupants…</div></td><td class="role-cell">Event Planner</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">433</td></tr>
+<tr data-row="64"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Flexible Portfolio Design Engine</strong><div class="uc-summary">CBRE’s proprietary AI optimization engine turns lease and portfolio decisions into risk ma…</div></td><td class="role-cell">—</td><td class="source-cell">Transaction Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>TM / Portfolio Strategy</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="72"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Hypar (3rd-Party 3D Modeling)</strong><div class="uc-summary">Browser-based, Revit-native drafting and modeling software supported by AI — best all-in-o…</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="73"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>KREO (AI Space Analysis)</strong><div class="uc-summary">Space analysis software, powered by AI, that measures floor plans and outputs area by CBRE…</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="42"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Market &amp; Porfolio Canvas
+(Current State)</strong><div class="uc-summary">Market &amp; Portfolio Canvas.  Automated market intel and portfolio analytics platform.  Curr…</div></td><td class="role-cell">—</td><td class="source-cell">Transaction Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>TM / Portfolio Strategy</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="63"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Market &amp; Porfolio Canvas
+(Phase 2 Rodamap)</strong><div class="uc-summary">Market &amp; Portfolio Canvas.  Near term development roadmap.
+- Metro planning tools - mulit-…</div></td><td class="role-cell">—</td><td class="source-cell">Transaction Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>TM / Portfolio Strategy</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="66"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Occupancy Optimizer</strong><div class="uc-summary">AI-driven occupancy analytics to right-size Amazon&#x27;s space portfolio based on actual utili…</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="38"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Parametric Modeling</strong><div class="uc-summary">AI-driven parametric cost and design modeling to accelerate early-stage project estimation…</div></td><td class="role-cell">—</td><td class="source-cell">T&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>PJM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="70"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Plans Pro</strong><div class="uc-summary">AI-assisted space planning and drawing production tool.</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="34"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>QA Design Checklist</strong><div class="uc-summary">AI-powered QA checklist using training data on drawings to look for common issues — assess…</div></td><td class="role-cell">—</td><td class="source-cell">T&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>PJM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="71"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Qbiq (3rd-Party AI Test Fits)</strong><div class="uc-summary">AI-generated space test fits via 3rd-party Qbiq platform — rapid layout scenarios for new,…</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="33"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Quality Check System</strong><div class="uc-summary">AI quality review layer on drawings and submittals to flag issues before construction.</div></td><td class="role-cell">—</td><td class="source-cell">T&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>PJM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="25"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Room Layout generator</strong><div class="uc-summary">With pre-loaded room information per training room (AV capabilities, furniture available o…</div></td><td class="role-cell">Event Planner</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">477</td></tr>
+<tr data-row="31"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Scheduling</strong><div class="uc-summary">AI-assisted scheduling optimization and delay risk prediction across the project portfolio…</div></td><td class="role-cell">—</td><td class="source-cell">T&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>PJM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">14</td></tr>
+<tr data-row="14"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Sentiment gathering</strong><div class="uc-summary">AI Generated sweep of emails, WO, teams messages that identifies and captures sentiment fe…</div></td><td class="role-cell">All Experience</td><td class="source-cell">Solution Architect Team</td><td><span class="badge badge-Live">Live</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">13</td></tr>
+<tr data-row="68"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Space &amp; Place Central</strong><div class="uc-summary">Centralized AI-powered platform for space management, booking, and portfolio planning.</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="89"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Sustainability Insights Compliance</strong><div class="uc-summary">Spend less time on compliance and identifying risk</div></td><td class="role-cell">Energy Analyst</td><td class="source-cell">E&amp;S</td><td><span class="badge badge-Live">Live</span></td><td>E&amp;S</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="37"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>The Hive / Alice — Scheduling Optimization</strong><div class="uc-summary">AI-powered scheduling platform (potential program called &#x27;Alice&#x27;) to streamline FM schedul…</div></td><td class="role-cell">—</td><td class="source-cell">T&amp;T</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>PJM</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">50</td></tr>
+<tr data-row="67"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Vibrancy Calculator</strong><div class="uc-summary">Tool to measure and optimize workplace vibrancy — balancing utilization efficiency with em…</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+<tr data-row="32"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Virtual Lobby</strong><div class="uc-summary">Partner with Amazon to build/customize a system that connects sites with low foot traffic …</div></td><td class="role-cell">Receptionist</td><td class="source-cell">D&amp;T</td><td><span class="badge badge-InRoadmap">In D&amp;T Roadmap</span></td><td>Experience</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell">1,000</td></tr>
+<tr data-row="74"><td class="priority-cell"><span class="badge badge-pri-na">—</span></td><td class="uc-cell"><strong>Workplace Parameter (Space Need + Vibrancy Estimator)</strong><div class="uc-summary">Tool to estimate space needs based on design inputs while also measuring forecasted workpl…</div></td><td class="role-cell">Occupancy Planner</td><td class="source-cell">Occupancy Mangement</td><td><span class="badge badge-NotInRoadmap">Not in D&amp;T Roadmap</span></td><td>Occupancy Mangement</td><td class="models-cell"><span style="color:#BBB;">—</span></td><td class="hours-cell"><span style="color:#BBB;">—</span></td></tr>
+</tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <strong style="color:#003F2D;">Status legend:</strong>
+  <span class="legend-item"><span class="badge badge-Live">Live</span> Ready for deployment</span>
+  <span class="legend-item"><span class="badge badge-LR">Limited Release</span></span>
+  <span class="legend-item"><span class="badge badge-Testing">In Testing</span></span>
+  <span class="legend-item"><span class="badge badge-InRoadmap">In D&T Roadmap</span></span>
+  <span class="legend-item"><span class="badge badge-NeedsReview">Needs Review by D&T</span></span>
+</div>
+
+<div class="footer">
+  SA Priority sourced from column G. Source sourced from column J. Average hours saved is the mean of populated rows (Hrs/FTE/yr). Live data — synced from the AI Use Case Master Tracker (Smartsheet) on load.
+</div>
+
+</div><!-- /#tab-usecases -->
+
+<div id="tab-ideas" class="tab-panel">
+  <div class="section-title">
+    Submitted Ideas
+    <span class="count" id="ideasCount"></span>
+  </div>
+  <div id="ideasList"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-container">
+    <div class="modal" id="modalContent">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ideaModalOverlay">
+  <div class="modal-container">
+    <div class="modal">
+      <button class="modal-close" id="ideaModalClose">✕</button>
+      <h2>Submit a New Idea</h2>
+      <p class="form-note" style="margin-bottom:20px;">Add a new AI use case idea to the tracker. Fields marked <span class="req">*</span> are required.</p>
+      <form class="idea-form" id="ideaForm" autocomplete="off">
+        <div class="form-row">
+          <label for="if_use_case">Use Case / Idea Name <span class="req">*</span></label>
+          <input type="text" id="if_use_case" name="use_case" maxlength="200" required>
+        </div>
+        <div class="form-row">
+          <label for="if_description">Description <span class="req">*</span></label>
+          <textarea id="if_description" name="description" maxlength="4000" required></textarea>
+          <div class="form-note">What is the idea, and what problem does it solve?</div>
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="if_service_line">Service Line</label>
+            <select id="if_service_line" name="service_line">
+              <option value="">Select…</option>
+              <option value="FM">FM</option>
+              <option value="E&amp;S">E&amp;S</option>
+              <option value="Experience">Experience</option>
+              <option value="Occupancy Mangement">Occupancy Management</option>
+              <option value="PJM">PJM</option>
+              <option value="Procurement">Procurement</option>
+              <option value="Property Management">Property Management</option>
+              <option value="TM / Portfolio Strategy">TM / Portfolio Strategy</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="if_impacted_role">Impacted Role</label>
+            <input type="text" id="if_impacted_role" name="impacted_role" maxlength="120" placeholder="e.g. Technician">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="if_priority">SA Priority</label>
+            <select id="if_priority" name="sa_priority_rank">
+              <option value="0">Unassigned</option>
+              <option value="3">3 — High</option>
+              <option value="2">2 — Med</option>
+              <option value="1">1 — Low</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="if_hours">Est. Savings (hrs/fte/yr)</label>
+            <input type="number" id="if_hours" name="hours_saved" min="0" step="1" placeholder="Optional">
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="if_submitter">Submitted By</label>
+          <input type="text" id="if_submitter" name="submitted_by" maxlength="120" placeholder="Your name or email">
+        </div>
+        <div id="ideaFormMsg"></div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="ideaCancelBtn">Cancel</button>
+          <button type="submit" class="btn-primary" id="ideaSubmitBtn">Submit Idea</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+let DATA = [];  // populated live from the Worker (/api/data?sheet=master)
+
+function statusClass(s) {
+  return ({
+    'Live': 'Live',
+    'Limited Release': 'LR',
+    'In Testing': 'Testing',
+    'Not in D&T Roadmap': 'NeedsReview',
+    'Needs Review By D&T': 'NeedsReview',
+    'In D&T Roadmap': 'InRoadmap',
+    'BOA Verify Overall Status': 'NeedsReview',
+    'Idea — Submitted': 'Idea',
+  })[s] || 'InRoadmap';
+}
+
+function num(v) { if (v === null || v === undefined) return ''; return Number(v).toLocaleString(); }
+
+function priorityBadge(d) {
+  const rank = d.sa_priority_rank || 0;
+  if (rank === 1) return '<span class="badge badge-pri-1">1 — Low</span>';
+  if (rank === 2) return '<span class="badge badge-pri-2">2 — Med</span>';
+  if (rank === 3) return '<span class="badge badge-pri-3">3 — High</span>';
+  if (d.sa_priority_label) return `<span class="badge badge-pri-na">${escapeHtml(d.sa_priority_label)}</span>`;
+  return '<span class="badge badge-pri-na">—</span>';
+}
+
+// Submitted-idea records, keyed by their (namespaced) row id, for modal lookup.
+const IDEAS_BY_ROW = {};
+
+// Map a raw Smartsheet {columnTitle: value} object into the dashboard's record
+// shape. RAW columns are copied; DERIVED fields are computed here (the only
+// place this logic lives now that DATA is loaded live).
+const STATUS_NORM = { 'Roadmap': 'In D&T Roadmap', 'Testing': 'In Testing', 'Testinging': 'In Testing' };
+const PRI_LABEL = { 1: '1 — Low', 2: '2 — Med', 3: '3 — High' };
+function normalizeRow(c) {
+  const g = (k) => { const v = c[k]; return (v === undefined || v === '') ? null : v; };
+  const status_raw = g('Status');
+  const status = (status_raw && STATUS_NORM[status_raw]) || status_raw || null;
+  let rank = Number(g('Priority Score 1= Low 2=Med 3 =High 0 =Live')) || 0;
+  // Submissions sheet stores a label ("3 — High") in an "SA Priority" column.
+  if (!rank) { const sp = g('SA Priority'); if (sp) { const m = /[123]/.exec(String(sp)); if (m) rank = Number(m[0]); } }
+  const hours = Number(g('Hours Saved Per FTE per Year')) || 0;
+  const source = g('Source');
+  const modeled = g('Modeled in Solution');
+  const is_modeled = modeled === 'Yes';
+  const is_dt_ifm = source === 'D&T';
+  const description = g('Description') || '';
+  const signals = [];
+  if (rank === 2) signals.push('SA Priority: Med');
+  else if (rank === 3) signals.push('SA Priority: High');
+  if (is_dt_ifm) signals.push('D&T sourced');
+  if (is_modeled) signals.push('In solutioning tools');
+  if (hours > 0) signals.push(Math.round(hours).toLocaleString() + ' hrs/FTE/yr');
+  return {
+    num: g('#'),
+    use_case: g('Use Case') || '',
+    service_line: g('Service Line'),
+    impacted_role: g('Impacted Role'),
+    description,
+    summary: description.replace(/\s+/g, ' ').trim(),
+    status_raw, status,
+    sa_priority_rank: rank,
+    sa_priority_value: rank === 0 ? null : rank,
+    sa_priority_label: rank === 0 ? null : PRI_LABEL[rank],
+    modeled_in_solution: modeled,
+    is_modeled,
+    sqi: g('Service Quality Improvement'),
+    source, is_dt_ifm,
+    hours_saved: hours,
+    governing_formula: g('Governing Formula'),
+    impact_review: g('Impact Review Complete'),
+    solutioning_notes: g('Solutioning Notes'),
+    source_notes: g('Source Notes and Draft Fromulas'),
+    risks: g('Risks / Things to Plan For'),
+    assumptions: g('Assumptions'),
+    investment: g('D&T Est. Investment ($)'),
+    dt_timing: g('D&T Go-Live Date (for roadmap items only)'),
+    dt_tech: g('D&T Technology Dependancy'),
+    potential_models: g('AI ML Models'),
+    model_descriptions: g('AI ML/ Model Descriptions'),
+    value: g('NOTES: Non-FTE Based Savings'),
+    cluster: g('Cluster / Related Rows'),
+    boa_assumption: g('BOA / Amazon Assumption'),
+    submitted_by: g('Submitted By'),
+    submitted_at: g('Submitted At'),
+    impact_signals: signals,
+    impact_score: ({ 0:0, 1:30, 2:60, 3:90 }[rank] || 0) + (is_dt_ifm ? 10 : 0) + Math.min(Math.round(hours * 0.2), 100),
+  };
+}
+
+function buildSummary() {
+// === KPIs ===
+const counts = {
+  total: DATA.length,
+  live: DATA.filter(d => d.status === 'Live').length,
+  lr: DATA.filter(d => d.status === 'Limited Release').length,
+  testing: DATA.filter(d => d.status === 'In Testing').length,
+  inRoadmap: DATA.filter(d => d.status === 'In D&T Roadmap').length,
+  notInRoadmap: DATA.filter(d => d.status === 'Needs Review By D&T').length,
+  modeled: DATA.filter(d => d.is_modeled).length,
+};
+const ready = counts.live + counts.lr;
+const hoursPop = DATA.filter(d => d.hours_saved).map(d => d.hours_saved);
+const avgHours = hoursPop.length ? hoursPop.reduce((a,b) => a+b, 0) / hoursPop.length : 0;
+
+const kpis = [
+  { label: 'Total AI Initiatives',          value: counts.total,        cls: 'total' },
+  { label: 'Ready for Deployment',          value: ready,               cls: 'ready' },
+  { label: 'In D&T Testing',                value: counts.testing,      cls: 'testing' },
+  { label: 'In D&T Roadmap',                value: counts.inRoadmap,    cls: 'roadmap' },
+  { label: 'Needs Review by D&T',           value: counts.notInRoadmap, cls: 'needs' },
+  { label: 'In Solutioning Tools',          value: counts.modeled,      cls: 'enabled' },
+  { label: 'Avg Hours Saved per Use Case',  value: num(Math.round(avgHours)), cls: 'hours' },
+];
+document.getElementById('kpiRow').innerHTML = kpis.map(k => `
+  <div class="kpi ${k.cls}">
+    <div class="label">${k.label}</div>
+    <div class="value">${k.value}</div>
+  </div>`).join('');
+
+// === Ready for Deployment cards ===
+renderReady();
+}
+
+function readyCard(d) {
+  const sc = statusClass(d.status);
+  const sigs = d.impact_signals && d.impact_signals.length ? d.impact_signals.join(' · ') : '';
+  const savings = d.hours_saved
+    ? `<div class="card-savings">${num(Math.round(d.hours_saved))} hrs/fte/yr saved</div>`
+    : '';
+  return `<div class="featured-card" data-row="${d.row}">
+    <div class="card-main">
+      <div class="badge-row">
+        <span class="badge badge-${sc}">${d.status}</span>
+        ${d.is_dt_ifm ? '<span class="badge badge-dt">D&T</span>' : ''}
+      </div>
+      <h3>${escapeHtml(d.use_case)}</h3>
+      <div class="meta">${escapeHtml(d.service_line || '—')}${d.impacted_role ? ' · ' + escapeHtml(d.impacted_role) : ''}</div>
+      ${sigs ? `<div class="meta" style="margin-top:8px;">${escapeHtml(sigs)}</div>` : ''}
+    </div>
+    ${savings}
+  </div>`;
+}
+
+// Render Ready for Deployment as a vertical list, grouped by impacted role
+// (ordered by total savings) and narrowable via the Ready-section role filter.
+function renderReady() {
+  const sel = document.getElementById('readyRoleFilter');
+  const fRole = sel ? sel.value : '';
+  const readyItems = DATA
+    .filter(d => d.status === 'Live' || d.status === 'Limited Release')
+    .sort((a, b) => {
+      const ah = a.hours_saved || 0, bh = b.hours_saved || 0;
+      if (ah !== bh) return bh - ah;
+      return a.use_case.localeCompare(b.use_case);
+    });
+  const roleGroups = {};
+  readyItems.forEach(d => {
+    const role = d.impacted_role || 'Unspecified';
+    (roleGroups[role] = roleGroups[role] || []).push(d);
+  });
+  const roleTotal = role => roleGroups[role].reduce((s, d) => s + (d.hours_saved || 0), 0);
+  let orderedRoles = Object.keys(roleGroups).sort((a, b) => {
+    const diff = roleTotal(b) - roleTotal(a);
+    return diff !== 0 ? diff : a.localeCompare(b);
+  });
+  if (fRole) orderedRoles = orderedRoles.filter(r => r === fRole);
+
+  const shown = orderedRoles.reduce((s, r) => s + roleGroups[r].length, 0);
+  document.getElementById('readyCount').textContent =
+    fRole ? `${shown} of ${readyItems.length} ready` : `${readyItems.length} ready`;
+
+  const grid = document.getElementById('featuredGrid');
+  grid.innerHTML = '';
+  if (!orderedRoles.length) {
+    grid.innerHTML = '<div class="empty-state" style="padding:18px; color:#999;">No ready-for-deployment tools for this role.</div>';
+    return;
+  }
+  const groupHtml = orderedRoles.map(role => {
+    const items = roleGroups[role];
+    const total = roleTotal(role);
+    const meta = `${items.length} tool${items.length > 1 ? 's' : ''}${total ? ' · ' + num(Math.round(total)) + ' hrs/fte/yr' : ''}`;
+    return `<div class="role-group">
+      <div class="role-group-header">
+        <span class="role-name">${escapeHtml(role)}</span>
+        <span class="role-group-meta">${meta}</span>
+      </div>
+      <div class="role-cards">${items.map(readyCard).join('')}</div>
+    </div>`;
+  });
+  // Greedy masonry: place each role group into the currently shortest column.
+  const colCount = Math.max(1, Math.min(orderedRoles.length, Math.floor((grid.clientWidth || 1200) / 300)));
+  const cols = [];
+  for (let i = 0; i < colCount; i++) {
+    const c = document.createElement('div');
+    c.className = 'fg-col';
+    grid.appendChild(c);
+    cols.push(c);
+  }
+  groupHtml.forEach(htmlStr => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = htmlStr;
+    const el = wrap.firstElementChild;
+    let target = cols[0];
+    for (const c of cols) { if (c.offsetHeight < target.offsetHeight) target = c; }
+    target.appendChild(el);
+  });
+}
+// === Filters (rebuilt from live DATA each load) ===
+function rebuildFilterOptions() {
+  const fill = (id, values) => {
+    const el = document.getElementById(id);
+    Array.from(el.options).forEach((o, i) => { if (i > 0) o.remove(); }); // keep the "All" option
+    values.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o); });
+  };
+  fill('statusFilter', [...new Set(DATA.map(d => d.status).filter(Boolean))].sort());
+  fill('slFilter',     [...new Set(DATA.map(d => d.service_line || 'Unset'))].sort());
+  fill('sourceFilter', [...new Set(DATA.map(d => d.source || 'Unset'))].sort());
+  fill('roleFilter',   [...new Set(DATA.map(d => d.impacted_role || 'Unset'))].sort());
+  fill('readyRoleFilter', [...new Set(DATA
+    .filter(d => d.status === 'Live' || d.status === 'Limited Release')
+    .map(d => d.impacted_role || 'Unspecified'))].sort());
+}
+document.getElementById('readyRoleFilter').addEventListener('change', renderReady);
+
+// === Sort state ===
+let sortKey = 'sa_priority_rank';
+let sortDir = 'desc';
+
+function applySort(rows) {
+  return rows.slice().sort((a,b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (av === null || av === undefined || av === '') av = sortDir === 'asc' ? Infinity : -Infinity;
+    if (bv === null || bv === undefined || bv === '') bv = sortDir === 'asc' ? Infinity : -Infinity;
+    if (typeof av === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+function render() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const fs = document.getElementById('statusFilter').value;
+  const fsl = document.getElementById('slFilter').value;
+  const fsrc = document.getElementById('sourceFilter').value;
+  const frole = document.getElementById('roleFilter').value;
+  const fp = document.getElementById('priFilter').value;
+
+  let filtered = DATA.filter(d => {
+    if (fs && d.status !== fs) return false;
+    if (fsl && (d.service_line || 'Unset') !== fsl) return false;
+    if (fsrc && (d.source || 'Unset') !== fsrc) return false;
+    if (frole && (d.impacted_role || 'Unset') !== frole) return false;
+    if (fp !== '') {
+      const want = parseInt(fp, 10);
+      if ((d.sa_priority_rank || 0) !== want) return false;
+    }
+    if (q) {
+      const hay = (d.use_case + ' ' + (d.summary || '') + ' ' + (d.impacted_role || '') + ' ' + (d.service_line || '') + ' ' + (d.source || '')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  
+  filtered = applySort(filtered);
+  
+  document.getElementById('totalCount').textContent = `${filtered.length} of ${DATA.length}`;
+  
+  const tbody = document.getElementById('tableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No use cases match the current filters.</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = filtered.map(d => {
+    const sc = statusClass(d.status);
+    const summary = (d.summary || '').substring(0, 90) + ((d.summary || '').length > 90 ? '…' : '');
+    return `<tr data-row="${d.row}">
+      <td class="priority-cell">${priorityBadge(d)}</td>
+      <td class="uc-cell"><strong>${escapeHtml(d.use_case)}</strong><div class="uc-summary">${escapeHtml(summary || '—')}</div></td>
+      <td class="role-cell">${escapeHtml(d.impacted_role || '—')}</td>
+      <td class="source-cell">${escapeHtml(d.source || '—')}</td>
+      <td><span class="badge badge-${sc}">${d.status}</span></td>
+      <td>${escapeHtml(d.service_line || '—')}</td>
+      <td class="models-cell">${d.dt_tech ? `<div class="models-preview">${escapeHtml(d.dt_tech.length > 80 ? d.dt_tech.substring(0, 80) + '…' : d.dt_tech)}</div>` : '<span style="color:#BBB;">—</span>'}</td>
+      <td class="hours-cell">${d.hours_saved ? num(Math.round(d.hours_saved)) : '<span style=\"color:#BBB;\">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// === Modal ===
+function openModal(rowId) {
+  const d = DATA.find(x => x.row === rowId) || IDEAS_BY_ROW[rowId];
+  if (!d) return;
+  const sc = statusClass(d.status);
+  const mb = document.getElementById('modalBody');
+  const field = (label, value, html) => {
+    if (!value && value !== 0 && !html) return `<div class="field"><div class="field-label">${label}</div><div class="field-value muted">Not specified</div></div>`;
+    return `<div class="field"><div class="field-label">${label}</div><div class="field-value">${html ? value : escapeHtml(String(value))}</div></div>`;
+  };
+  const priLabel = d.sa_priority_label || (d.sa_priority_rank ? d.sa_priority_rank : '');
+  mb.innerHTML = `
+    <h2>${escapeHtml(d.use_case)}</h2>
+    <div class="modal-badges">
+      <span class="badge badge-${sc}">${d.status}</span>
+      ${d.is_dt_ifm ? '<span class="badge badge-dt">D&T sourced</span>' : ''}
+      ${priorityBadge(d)}
+      ${d.num ? `<span class="badge badge-InRoadmap">#${escapeHtml(d.num)}</span>` : ''}
+    </div>
+    <div class="field">
+      <div class="field-label">Description</div>
+      <div class="field-value">${escapeHtml(d.description) || '—'}</div>
+    </div>
+    <div class="meta-grid">
+      ${field('Service Line', d.service_line)}
+      ${field('Impacted Role', d.impacted_role)}
+      ${field('SA Priority (col G)', priLabel)}
+      ${field('Source (col J)', d.source)}
+      ${field('Hours Saved / FTE / Year', d.hours_saved ? d.hours_saved.toLocaleString() : '')}
+      ${field('Modeled in Solution', d.modeled_in_solution)}
+      ${field('Service Quality Improvement', d.sqi)}
+      ${field('D&T Tech Dependency', d.dt_tech)}
+      ${field('D&T Timing', d.dt_timing)}
+      ${field('Investment', d.investment)}
+      ${field('Impact Review Complete', d.impact_review)}
+    </div>
+    ${d.solutioning_notes ? field('Solutioning Notes', d.solutioning_notes) : ''}
+    ${d.governing_formula ? field('Governing Formula', d.governing_formula) : ''}
+    ${d.source_notes ? field('Source Notes', d.source_notes) : ''}
+    ${d.risks ? field('Risks / Things to Plan For', d.risks) : ''}
+    ${d.assumptions ? field('Assumptions', d.assumptions) : ''}
+    ${d.cluster ? field('Cluster / Related', d.cluster) : ''}
+    ${d.boa_assumption ? field('BOA / Amazon Assumption', d.boa_assumption) : ''}
+    ${d.value ? field('Value', d.value) : ''}
+    ${d.potential_models ? field('Potential Models', d.potential_models) : ''}
+    ${d.model_descriptions ? field('Model Descriptions', d.model_descriptions) : ''}
+    <div class="field" style="border:none; padding-top:8px;">
+      <div class="field-label">Tracker Reference</div>
+      <div class="field-value muted">Idea Inventory row ${d.row}</div>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+// === Event wiring ===
+document.getElementById('tableBody').addEventListener('click', e => {
+  const tr = e.target.closest('tr');
+  if (tr && tr.dataset.row) openModal(parseInt(tr.dataset.row));
+});
+document.getElementById('featuredGrid').addEventListener('click', e => {
+  const card = e.target.closest('.featured-card');
+  if (card && card.dataset.row) openModal(parseInt(card.dataset.row));
+});
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'modalOverlay') closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const k = th.dataset.sort;
+    if (sortKey === k) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else {
+      sortKey = k;
+      sortDir = (k === 'use_case' || k === 'service_line' || k === 'status' || k === 'impacted_role' || k === 'source' || k === 'dt_tech') ? 'asc' : 'desc';
+    }
+    document.querySelectorAll('th[data-sort]').forEach(x => x.classList.remove('sort-asc','sort-desc'));
+    th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    render();
+  });
+});
+
+['searchInput','statusFilter','slFilter','sourceFilter','roleFilter','priFilter'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('statusFilter').value = '';
+  document.getElementById('slFilter').value = '';
+  document.getElementById('sourceFilter').value = '';
+  document.getElementById('roleFilter').value = '';
+  document.getElementById('priFilter').value = '';
+  render();
+});
+
+// Persist user prefs. Applied after rebuildFilterOptions() so the saved
+// <option> values exist on the (live-populated) selects.
+function applySavedPrefs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('ifm_dash_prefs_v3') || '{}');
+    if (saved.status) document.getElementById('statusFilter').value = saved.status;
+    if (saved.sl) document.getElementById('slFilter').value = saved.sl;
+    if (saved.src) document.getElementById('sourceFilter').value = saved.src;
+    if (saved.role) document.getElementById('roleFilter').value = saved.role;
+    if (saved.pri) document.getElementById('priFilter').value = saved.pri;
+    if (saved.sortKey) { sortKey = saved.sortKey; sortDir = saved.sortDir; }
+  } catch(e) {}
+}
+function savePrefs() {
+  try {
+    localStorage.setItem('ifm_dash_prefs_v3', JSON.stringify({
+      status: document.getElementById('statusFilter').value,
+      sl: document.getElementById('slFilter').value,
+      src: document.getElementById('sourceFilter').value,
+      role: document.getElementById('roleFilter').value,
+      pri: document.getElementById('priFilter').value,
+      sortKey, sortDir,
+    }));
+  } catch(e) {}
+}
+['statusFilter','slFilter','sourceFilter','roleFilter','priFilter'].forEach(id => {
+  document.getElementById(id).addEventListener('change', savePrefs);
+});
+
+/* ============================================================================
+   ADD IDEA — user-submitted use cases
+   ----------------------------------------------------------------------------
+   Submissions are written to a SharePoint list (system of record) and also
+   cached in the browser so the submitter sees their idea immediately.
+
+   IT SETUP: fill in the SHAREPOINT config below and set `enabled: true`.
+   The page must be served from the same SharePoint web (same origin) so the
+   credentialed REST call and form digest succeed. Create a SharePoint list
+   with columns matching `fieldMap` (Title is built in; add the rest as the
+   listed internal names, or change the names here to match your list).
+   ============================================================================ */
+const SHAREPOINT = {
+  enabled: false, // <-- IT: set to true once the list + hosting are in place
+  siteUrl: "https://YOURTENANT.sharepoint.com/sites/YOURSITE",
+  listTitle: "AI Use Case Tracker",
+  // dashboard field  ->  SharePoint internal column name
+  fieldMap: {
+    use_case:         "Title",
+    description:      "Description",
+    service_line:     "ServiceLine",
+    impacted_role:    "ImpactedRole",
+    sa_priority_rank: "SAPriorityRank",
+    hours_saved:      "SavingsHrsPerFTEPerYr",
+    submitted_by:     "SubmittedBy",
+    status:           "Status",
+  },
+};
+
+/* ============================================================================
+   ADD IDEA → GITHUB ISSUES  (active system of record for submitted ideas)
+   ----------------------------------------------------------------------------
+   Submitting an idea opens a pre-filled GitHub Issue (labelled `idea`) in the
+   repo below, in a new tab; the submitter clicks "Submit new issue" to save it.
+   Submitters need access to the (private) repo to post.
+   To re-point this at a different repo, edit `owner` / `repo` below.
+   (SharePoint above is dormant — it is only used if GITHUB.enabled = false.)
+   ============================================================================ */
+// (Legacy) GitHub Issues path — superseded by IDEA_API below. Kept for reference only.
+const GITHUB = {
+  enabled: false,
+  owner:  "cbre-vantage-studio",          // GitHub user/org that owns the repo
+  repo:   "AIenabledFM",                  // repo name
+  label:  "idea",
+};
+
+/* ============================================================================
+   ADD IDEA → SMARTSHEET  (background submit via a Cloudflare Worker proxy)
+   ----------------------------------------------------------------------------
+   On submit, the dashboard POSTs the idea to the Worker URL below. The Worker
+   holds the Smartsheet API token SERVER-SIDE (never in this public page) and
+   adds a row to the "AI Use Case Ideas (Submissions)" sheet. The submitter
+   never leaves the dashboard; a toast confirms success.
+   See the worker/ folder for the Worker code and one-time setup.
+   >>> After deploying the Worker, paste its URL here: <<<
+   ============================================================================ */
+const IDEA_API = {
+  enabled: true,
+  url: "/api/idea",  // same-origin route on the consolidated Worker
+};
+function openGitHubIssue(rec) {
+  if (!GITHUB.enabled || GITHUB.owner === "YOUR-GITHUB-USERNAME") return false;
+  const title = "[Idea] " + rec.use_case;
+  const body = [
+    "**Use Case:** " + rec.use_case,
+    "**Service Line:** " + (rec.service_line || "—"),
+    "**Impacted Role:** " + (rec.impacted_role || "—"),
+    "**SA Priority:** " + (rec.sa_priority_label || "—"),
+    "**Est. Hours Saved / FTE / yr:** " + (rec.hours_saved || 0),
+    "**Submitted By:** " + (rec.submitted_by || "—"),
+    "**Submitted At:** " + rec.submitted_at,
+    "",
+    "### Description",
+    rec.description,
+  ].join("\n");
+  const url = "https://github.com/" + GITHUB.owner + "/" + GITHUB.repo +
+    "/issues/new?labels=" + encodeURIComponent(GITHUB.label) +
+    "&title=" + encodeURIComponent(title) +
+    "&body=" + encodeURIComponent(body);
+  window.open(url, "_blank", "noopener");
+  return true;
+}
+
+// NB: string literal (not a const) so this works when called at load time,
+// before the rest of this script block has finished initialising.
+function getStoredIdeas() {
+  try { return JSON.parse(localStorage.getItem('ifm_dash_ideas_v1') || '[]'); } catch(e) { return []; }
+}
+function saveStoredIdeas(arr) {
+  try { localStorage.setItem('ifm_dash_ideas_v1', JSON.stringify(arr)); } catch(e) {}
+}
+// Called at load (before buildSummary) to merge cached ideas into DATA.
+function mergeStoredIdeas() {
+  getStoredIdeas().forEach(it => {
+    if (!DATA.some(d => d.row === it.row)) DATA.push(it);
+  });
+}
+
+const PRI_LABELS = { 3: '3 — High', 2: '2 — Med', 1: '1 — Low' };
+
+async function postToSharePoint(rec) {
+  if (!SHAREPOINT.enabled) return { ok: false, skipped: true };
+  const base = SHAREPOINT.siteUrl.replace(/\/+$/, '');
+  // 1) request a form digest
+  const ctx = await fetch(base + '/_api/contextinfo', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json;odata=verbose' },
+    credentials: 'include',
+  });
+  const ctxJson = await ctx.json();
+  const digest = ctxJson.d.GetContextWebInformation.FormDigestValue;
+  // 2) build the item body from the field map
+  const body = {};
+  Object.entries(SHAREPOINT.fieldMap).forEach(([k, col]) => {
+    const v = rec[k];
+    if (v !== undefined && v !== null && v !== '') body[col] = v;
+  });
+  // 3) create the list item
+  const res = await fetch(
+    base + "/_api/web/lists/getbytitle('" + encodeURIComponent(SHAREPOINT.listTitle) + "')/items",
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json;odata=verbose',
+        'Content-Type': 'application/json;odata=verbose',
+        'X-RequestDigest': digest,
+      },
+      credentials: 'include',
+      body: JSON.stringify(body),
+    }
+  );
+  return { ok: res.ok, status: res.status };
+}
+
+const ideaOverlay = document.getElementById('ideaModalOverlay');
+const ideaMsg = document.getElementById('ideaFormMsg');
+function openIdeaModal() {
+  ideaMsg.className = ''; ideaMsg.textContent = '';
+  ideaOverlay.classList.add('open');
+  document.getElementById('if_use_case').focus();
+}
+function closeIdeaModal() { ideaOverlay.classList.remove('open'); }
+
+document.getElementById('addIdeaBtn').addEventListener('click', openIdeaModal);
+document.getElementById('ideaModalClose').addEventListener('click', closeIdeaModal);
+document.getElementById('ideaCancelBtn').addEventListener('click', closeIdeaModal);
+ideaOverlay.addEventListener('click', e => { if (e.target === ideaOverlay) closeIdeaModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeIdeaModal(); });
+
+document.getElementById('ideaForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target;
+  const use_case = f.use_case.value.trim();
+  const description = f.description.value.trim();
+  if (!use_case || !description) {
+    ideaMsg.className = 'err';
+    ideaMsg.textContent = 'Please complete the required fields (Use Case and Description).';
+    return;
+  }
+  const rank = parseInt(f.sa_priority_rank.value, 10) || 0;
+  const hours = f.hours_saved.value === '' ? 0 : Number(f.hours_saved.value);
+  const rec = {
+    row: Date.now(),
+    num: '',
+    use_case,
+    description,
+    summary: description,
+    service_line: f.service_line.value || null,
+    impacted_role: f.impacted_role.value.trim() || null,
+    source: 'Idea Submission',
+    submitted_by: f.submitted_by.value.trim() || null,
+    status: 'Idea — Submitted',
+    status_raw: 'Idea — Submitted',
+    sa_priority_rank: rank,
+    sa_priority_value: rank,
+    sa_priority_label: rank ? PRI_LABELS[rank] : '',
+    hours_saved: hours,
+    is_modeled: false,
+    is_dt_ifm: false,
+    impact_score: 0,
+    impact_signals: [],
+    potential_models: '',
+    submitted_at: new Date().toISOString(),
+    user_idea: true,
+  };
+
+  // Add to the live list + cache immediately
+  DATA.push(rec);
+  const ideas = getStoredIdeas(); ideas.push(rec); saveStoredIdeas(ideas);
+  buildSummary();
+  render();
+
+  // Persist the idea to Smartsheet via the Worker proxy (background — no navigation).
+  const btn = document.getElementById('ideaSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  let saved = false, errMsg = '';
+  if (IDEA_API.enabled && IDEA_API.url && !/REPLACE-WITH-YOUR-WORKER/.test(IDEA_API.url)) {
+    try {
+      const resp = await fetch(IDEA_API.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rec),
+      });
+      saved = resp.ok;
+      if (!resp.ok) {
+        const e = await resp.json().catch(() => ({}));
+        errMsg = e.error || ('HTTP ' + resp.status);
+      }
+    } catch (err) {
+      errMsg = String(err);
+    }
+  } else {
+    errMsg = 'submission endpoint not configured yet';
+  }
+  btn.disabled = false; btn.textContent = 'Submit Idea';
+
+  if (saved) {
+    ideaMsg.className = 'ok';
+    ideaMsg.textContent = 'Idea submitted to Smartsheet and added to the list. Thank you!';
+    f.reset();
+    setTimeout(closeIdeaModal, 1600);
+    loadIdeas(); // refresh the Ideas tab so the new submission shows there too
+  } else {
+    ideaMsg.className = 'err';
+    ideaMsg.textContent = 'Added to the list and cached locally, but the Smartsheet submission did not go through (' + errMsg + '). Please try again.';
+  }
+});
+
+// === Live load (data comes from the gated Worker; no embedded fallback) ===
+function setLoading() {
+  document.getElementById('kpiRow').innerHTML = '<div class="loading-state">Loading…</div>';
+  document.getElementById('featuredGrid').innerHTML = '<div class="loading-state">Loading live data…</div>';
+  document.getElementById('tableBody').innerHTML = '<tr><td colspan="8" class="loading-state">Loading live data from Smartsheet…</td></tr>';
+}
+function showLoadError() {
+  document.getElementById('kpiRow').innerHTML = '<div class="error-state">⚠️ Couldn’t load live data.</div>';
+  document.getElementById('featuredGrid').innerHTML = '';
+  document.getElementById('tableBody').innerHTML =
+    '<tr><td colspan="8" class="error-state">⚠️ Couldn’t load live data from the Master Tracker. Check your connection or sign in again, then reload.</td></tr>';
+}
+
+async function fetchRows(sheet) {
+  const r = await fetch('/api/data?sheet=' + sheet, { credentials: 'include' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  return Array.isArray(j.rows) ? j.rows : [];
+}
+
+async function boot() {
+  setLoading();
+  let rows = null;
+  try { rows = await fetchRows('master'); } catch (e) { rows = null; }
+  if (Array.isArray(rows) && rows.length) {
+    DATA.length = 0;
+    rows.forEach(x => { const rec = normalizeRow(x.cellsByTitle); rec.row = x.row; rec.permalink = x.permalink; DATA.push(rec); });
+    mergeStoredIdeas();
+    rebuildFilterOptions();
+    applySavedPrefs();
+    buildSummary();
+    render();
+  } else {
+    // No live data — fall back to any locally cached ideas, else show an error.
+    mergeStoredIdeas();
+    if (DATA.length) { rebuildFilterOptions(); applySavedPrefs(); buildSummary(); render(); }
+    else showLoadError();
+  }
+}
+
+// === Ideas tab ===
+let _ideasLoaded = false;
+function ideaCard(d) {
+  const meta = [d.service_line, d.impacted_role].filter(Boolean).join(' · ') || '—';
+  const when = d.submitted_at ? (new Date(d.submitted_at).toLocaleString('default') === 'Invalid Date' ? d.submitted_at : new Date(d.submitted_at).toLocaleDateString()) : '';
+  const sub = [d.submitted_by, when].filter(Boolean).join(' · ');
+  const desc = (d.summary || '').substring(0, 140) + ((d.summary || '').length > 140 ? '…' : '');
+  return `<div class="featured-card idea-card" data-row="${d.row}">
+    <div class="card-main">
+      <div class="badge-row">${priorityBadge(d)}${d.status ? `<span class="badge badge-${statusClass(d.status)}">${escapeHtml(d.status)}</span>` : ''}</div>
+      <h3>${escapeHtml(d.use_case || 'Untitled idea')}</h3>
+      <div class="meta">${escapeHtml(meta)}</div>
+      ${desc ? `<div class="meta" style="margin-top:8px;">${escapeHtml(desc)}</div>` : ''}
+      ${sub ? `<div class="meta idea-sub">Submitted by ${escapeHtml(sub)}</div>` : ''}
+    </div>
+  </div>`;
+}
+async function loadIdeas() {
+  const list = document.getElementById('ideasList');
+  const countEl = document.getElementById('ideasCount');
+  list.innerHTML = '<div class="loading-state">Loading submitted ideas…</div>';
+  let records;
+  try {
+    const rows = await fetchRows('submissions');
+    // Namespace idea row ids so they never collide with Master Tracker rows.
+    records = rows.map((x, i) => { const rec = normalizeRow(x.cellsByTitle); rec.row = 9000000 + i; rec.permalink = x.permalink; rec.user_idea = true; return rec; });
+  } catch (e) {
+    records = getStoredIdeas(); // fall back to this browser's cached submissions
+  }
+  for (const k in IDEAS_BY_ROW) delete IDEAS_BY_ROW[k];
+  records.forEach(d => { IDEAS_BY_ROW[d.row] = d; });
+  countEl.textContent = records.length + (records.length === 1 ? ' idea' : ' ideas');
+  list.innerHTML = records.length
+    ? records.map(ideaCard).join('')
+    : '<div class="empty-state" style="padding:18px;color:#999;">No ideas submitted yet. Use “+ Add Idea” to add one.</div>';
+  _ideasLoaded = true;
+}
+
+// === Tab switching ===
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+    if (tab === 'ideas' && !_ideasLoaded) loadIdeas();
+  });
+});
+document.getElementById('ideasList').addEventListener('click', e => {
+  const card = e.target.closest('.idea-card');
+  if (card && card.dataset.row) openModal(parseInt(card.dataset.row));
+});
+
+boot();
+let _readyResizeT;
+window.addEventListener('resize', () => { clearTimeout(_readyResizeT); _readyResizeT = setTimeout(renderReady, 150); });
+</script>
+</body>
+</html>
