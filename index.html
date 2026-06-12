@@ -698,7 +698,8 @@ table.use-cases tbody tr:hover { background: #FAFBFA; }
   <table class="use-cases">
     <thead>
       <tr>
-        <th data-sort="sa_priority_rank" class="sort-desc">SA Priority</th>
+        <th data-sort="overall_priority" class="sort-desc">Overall Priority</th>
+        <th data-sort="sa_priority_rank">SA Priority</th>
         <th data-sort="use_case">Use Case</th>
         <th data-sort="impacted_role">Impacted Role</th>
         <th data-sort="source">Source</th>
@@ -955,7 +956,7 @@ Narrative:…</div></td><td class="role-cell">Technician</td><td class="source-c
 </div>
 
 <div class="footer">
-  SA Priority sourced from column G. Source sourced from column J. Average hours saved is the mean of populated rows (Hrs/FTE/yr). Live data — synced from the AI Use Case Master Tracker (Smartsheet) on load.
+  Overall Priority sourced from column G; SA Priority from column H. Source sourced from column K. Average hours saved is the mean of populated rows (Hrs/FTE/yr). Live data — synced from the AI Use Case Master Tracker (Smartsheet) on load.
 </div>
 
 </div><!-- /#tab-usecases -->
@@ -1075,7 +1076,7 @@ const IDEAS_BY_ROW = {};
 // Map a raw Smartsheet {columnTitle: value} object into the dashboard's record
 // shape. RAW columns are copied; DERIVED fields are computed here (the only
 // place this logic lives now that DATA is loaded live).
-const STATUS_NORM = { 'Roadmap': 'In D&T Roadmap', 'Testing': 'In Testing', 'Testinging': 'In Testing', 'Needs Assessment by D&T': 'Needs Review By D&T' };
+const STATUS_NORM = { 'Roadmap': 'In D&T Roadmap', 'Testing': 'In Testing', 'Testinging': 'In Testing', 'Needs Assessment by D&T': 'Needs Review By D&T', 'BOA Verify Overall Status': 'Needs Review By D&T' };
 const PRI_LABEL = { 1: '1 — Low', 2: '2 — Med', 3: '3 — High' };
 function normalizeRow(c) {
   const g = (k) => { const v = c[k]; return (v === undefined || v === '') ? null : v; };
@@ -1104,6 +1105,8 @@ function normalizeRow(c) {
     description,
     summary: description.replace(/\s+/g, ' ').trim(),
     status_raw, status,
+    overall_priority: (() => { const v = g('Overall Priority'); return (v === null || v === '') ? null : Number(v); })(),
+    task: g('Task'),
     sa_priority_rank: rank,
     sa_priority_value: rank === 0 ? null : rank,
     sa_priority_label: rank === 0 ? null : PRI_LABEL[rank],
@@ -1269,7 +1272,7 @@ function rebuildFilterOptions() {
 document.getElementById('readyRoleFilter').addEventListener('change', renderReady);
 
 // === Sort state ===
-let sortKey = 'sa_priority_rank';
+let sortKey = 'overall_priority';
 let sortDir = 'desc';
 
 function applySort(rows) {
@@ -1314,7 +1317,7 @@ function render() {
   
   const tbody = document.getElementById('tableBody');
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No use cases match the current filters.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No use cases match the current filters.</td></tr>';
     return;
   }
   
@@ -1322,6 +1325,7 @@ function render() {
     const sc = statusClass(d.status);
     const summary = (d.summary || '').substring(0, 90) + ((d.summary || '').length > 90 ? '…' : '');
     return `<tr data-row="${d.row}">
+      <td class="priority-cell">${d.overall_priority != null ? d.overall_priority : '<span style="color:#BBB;">—</span>'}</td>
       <td class="priority-cell">${priorityBadge(d)}</td>
       <td class="uc-cell"><strong>${escapeHtml(d.use_case)}</strong><div class="uc-summary">${escapeHtml(summary || '—')}</div></td>
       <td class="role-cell">${escapeHtml(d.impacted_role || '—')}</td>
@@ -1360,7 +1364,9 @@ function openModal(rowId) {
     <div class="meta-grid">
       ${field('Service Line', d.service_line)}
       ${field('Impacted Role', d.impacted_role)}
-      ${field('SA Priority (col G)', priLabel)}
+      ${field('Overall Priority (col G)', d.overall_priority)}
+      ${field('Task', d.task)}
+      ${field('SA Priority (col H)', priLabel)}
       ${field('Source (col J)', d.source)}
       ${field('Hours Saved / FTE / Year', d.hours_saved ? d.hours_saved.toLocaleString() : '')}
       ${field('Modeled in Solution', d.modeled_in_solution)}
@@ -1696,13 +1702,13 @@ document.getElementById('ideaForm').addEventListener('submit', async e => {
 function setLoading() {
   document.getElementById('kpiRow').innerHTML = '<div class="loading-state">Loading…</div>';
   document.getElementById('featuredGrid').innerHTML = '<div class="loading-state">Loading live data…</div>';
-  document.getElementById('tableBody').innerHTML = '<tr><td colspan="8" class="loading-state">Loading live data from Smartsheet…</td></tr>';
+  document.getElementById('tableBody').innerHTML = '<tr><td colspan="9" class="loading-state">Loading live data from Smartsheet…</td></tr>';
 }
 function showLoadError() {
   document.getElementById('kpiRow').innerHTML = '<div class="error-state">⚠️ Couldn’t load live data.</div>';
   document.getElementById('featuredGrid').innerHTML = '';
   document.getElementById('tableBody').innerHTML =
-    '<tr><td colspan="8" class="error-state">⚠️ Couldn’t load live data from the Master Tracker. Check your connection or sign in again, then reload.</td></tr>';
+    '<tr><td colspan="9" class="error-state">⚠️ Couldn’t load live data from the Master Tracker. Check your connection or sign in again, then reload.</td></tr>';
 }
 
 async function fetchRows(sheet) {
